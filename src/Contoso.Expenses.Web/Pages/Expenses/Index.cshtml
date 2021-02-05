@@ -1,0 +1,72 @@
+﻿@page
+@model Contoso.Expenses.Web.Pages.Expenses.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Expense[0].Purpose)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Expense[0].Date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Expense[0].CostCenter)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Expense[0].Amount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Expense[0].ApproverEmail)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Expense[0].SubmitterEmail)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Expense[0].Receipt)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Expense) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Purpose)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CostCenter)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ApproverEmail)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubmitterEmail)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Receipt)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.ExpenseId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.ExpenseId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.ExpenseId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
