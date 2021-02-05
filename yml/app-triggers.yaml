@@ -1,0 +1,145 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: conexp-triggertemplate
+spec:
+  params:
+    - name: gitrevision
+      description: The git revision
+      default: master
+    - name: gitrepositoryurl
+      description: The git repository url
+    - name: web-imageUrl
+      description: Url of image repository
+    - name: api-imageUrl
+      description: Url of image repository
+    - name: fn-imageUrl
+      description: Url of image repository
+    - name: namespace
+      description: The namespace to create the resources
+    - name: deployment-namespace
+      description: The namespace to deploy the yaml
+    - name: fn-deployment-namespace
+      description: The namespace to deploy the yaml      
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1alpha1
+      kind: PipelineRun
+      metadata:
+        name: conexp-pipeline-run-$(uid)
+        namespace: $(tt.params.namespace)
+      spec:
+        serviceAccountName: deployment-user
+        pipelineRef:
+          name: conexp-pipeline
+        podTemplate:
+          nodeSelector:
+            kubernetes.io/os: linux
+        params:
+          - name: deployment-namespace
+            value: $(tt.params.deployment-namespace)
+          - name: fn-deployment-namespace
+            value: $(tt.params.fn-deployment-namespace)            
+        resources:
+          - name: source-repo
+            resourceSpec:
+              type: git
+              params:
+              - name: revision
+                value: $(tt.params.gitrevision)
+              - name: url
+                value: $(tt.params.gitrepositoryurl)
+          - name: web-image-source
+            resourceSpec:
+              type: image
+              params:
+                - name: url
+                  value: $(tt.params.web-imageUrl)
+          - name: api-image-source
+            resourceSpec:
+              type: image
+              params:
+                - name: url
+                  value: $(tt.params.api-imageUrl)
+          - name: fn-image-source
+            resourceSpec:
+              type: image
+              params:
+                - name: url
+                  value: $(tt.params.fn-imageUrl)                  
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: conexp-pipelinebinding
+spec:
+  params:
+    - name: gitrevision
+      value: $(body.head_commit.id)
+    - name: namespace
+      value: conexp-mvp-devops
+    - name: deployment-namespace
+      value: conexp-mvp
+    - name: fn-deployment-namespace
+      value: openfaas-fn      
+    - name: gitrepositoryurl
+      value: "https://github.com/$(body.repository.full_name)"
+    - name: web-imageUrl
+      value: "{registryHost}/conexp/web:$(body.head_commit.id)"
+    - name: api-imageUrl
+      value: "{registryHost}/conexp/api:$(body.head_commit.id)"
+    - name: fn-imageUrl
+      value: "{registryHost}/conexp/emaildispatcher:$(body.head_commit.id)"
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: conexp-listener
+spec:
+  serviceAccountName: tekton-triggers-admin
+  triggers:
+    - name: github-listener
+      bindings:
+        - ref: conexp-pipelinebinding
+      template:
+        name: conexp-triggertemplate
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: docker-basic-user-pass
+  annotations:
+    tekton.dev/docker-0: http://{registryHost}
+type: kubernetes.io/basic-auth
+stringData:
+  username: conexp
+  password: FTA@CNCF0n@zure3
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: deployment-user
+secrets:
+  - name: docker-basic-user-pass
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pipeline-role
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pipeline-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pipeline-role
+subjects:
+- kind: ServiceAccount
+  name: deployment-user
+  namespace: conexp-mvp-devops
+---

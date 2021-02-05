@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-defaults
+data:
+  default-service-account: "tekton"
+  default-timeout-minutes: "20"
+  default-pod-template: |
+    nodeSelector:
+      kops.k8s.io/instancegroup: build-instance-group
+  default-managed-by-label-value: "my-tekton-installation"
