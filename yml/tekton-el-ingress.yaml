@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-resource
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1  
+spec:
+  rules:
+  - host: {cicdWebhook}
+    http:
+      paths:
+      - path: /cd
+        backend:
+          serviceName: el-conexp-listener
+          servicePort: 8080
