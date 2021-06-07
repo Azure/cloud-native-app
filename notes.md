@@ -1,11 +1,13 @@
-
+## 6
 Refer the [yml](yml) folder for the yamls
 
 - [Please find Source Code here](src)
 
-#Setup
+# Setup
 
 Create a Kubernetes Cluster
+
+Fork this repository (needed to enable CD) and clone it
 
 Install Nginx Ingress controller https://docs.microsoft.com/en-us/azure/aks/ingress-basic#create-an-ingress-controller
 Following commands from the first section of the referenced Docs Link is needed. 
@@ -14,17 +16,19 @@ Following commands from the first section of the referenced Docs Link is needed.
 # Create a namespace for your ingress resources
 kubectl create namespace ingress-basic
 
-# Add the official stable repository
-helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+# Add the ingress-nginx repository
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
 
 # Use Helm to deploy an NGINX ingress controller
-helm install nginx-ingress stable/nginx-ingress \
+helm install nginx-ingress ingress-nginx/ingress-nginx \
+    --version 3.23.0 \
     --namespace ingress-basic \
     --set controller.replicaCount=2 \
     --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
-    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
+    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux \
+    --set controller.admissionWebhooks.patch.nodeSelector."beta\.kubernetes\.io/os"=linux
 ```
-
 Set the variable to be used as the top level domain for this exercise. Use a custom domain or a cloud service provided domain name.
 ```
 topLevelDomain=desiredhostnamename.com
@@ -35,7 +39,7 @@ If using AKS, a DNS name label can be assigend to the public IP of the Loadbalan
  - Navigate to the Configuration blade and set a unique name in the DNS name label
  - Use the FQDN. For ex. uniquename.centralus.cloudapp.azure.com
 
-##Rook Installation
+## Rook Installation
 
 ```
 kubectl apply -f yml/rook-common.yaml
@@ -44,18 +48,16 @@ kubectl apply -f yml/rook-cluster.yaml
 kubectl apply -f yml/rook-storageclass.yaml
 ```
 
-##Harbor Installation
+## Harbor Installation
 
 Install Ingress for Harbor.
 ```
 # Create namespace for the harbor nginx ingress controller 
 kubectl create namespace harbor-ingress-system
 
-# Add the nginx helm repo
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-
 # Install nginx ingress for Harbor
 helm install harbor-nginx-ingress ingress-nginx/ingress-nginx \
+    --version 3.23.0 \
     --namespace harbor-ingress-system \
     --set controller.ingressClass=harbor-nginx \
     --set controller.replicaCount=2 \
@@ -73,18 +75,15 @@ kubectl label namespace ingress-basic cert-manager.io/disable-validation=true
 
 # Add the Jetstack Helm repository
 helm repo add jetstack https://charts.jetstack.io
-
-# Update your local Helm chart repository cache
 helm repo update
 
 # Install the cert-manager Helm chart
-helm install \
-  cert-manager \
+helm install cert-manager jetstack/cert-manager\
   --namespace ingress-basic \
   --version v0.16.1 \
   --set installCRDs=true \
-  --set nodeSelector."beta\.kubernetes\.io/os"=linux \
-  jetstack/cert-manager
+  --set nodeSelector."beta\.kubernetes\.io/os"=linux
+  
 ```
 
 Create the ClusterIssuer by applying the below YAML with the email address changed
@@ -133,14 +132,16 @@ externalUrl=https://$registryHost
 kubectl create namespace harbor-system
 # Add the harbor helm repo 
 helm repo add harbor https://helm.goharbor.io
+helm repo update
 
 # Install Harbor
 helm install harbor harbor/harbor \
 	--namespace harbor-system \
+	--version 1.6.0 \
 	--set expose.ingress.hosts.core=$registryHost \
-  --set expose.tls.secretName=ingress-cert-harbor \
+	--set expose.tls.secretName=ingress-cert-harbor \
 	--set notary.enabled=false \
-  --set trivy.enabled=false \
+	--set trivy.enabled=false \
 	--set expose.ingress.annotations."kubernetes\.io/ingress\.class"=harbor-nginx \
 	--set expose.ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt  \
 	--set persistence.enabled=true \
@@ -153,34 +154,61 @@ helm install harbor harbor/harbor \
 	--set persistence.persistentVolumeClaim.redis.storageClass=rook-ceph-block 
 
 ```
-Update the stateful set permission for the Harbor database so that it will not error on pod restarts
+Patch the database stateful for the Harbor database so it will not error on pod restarts
 ```
-kubectl edit statefulset harbor-harbor-database  -n harbor-system
+kubectl patch statefulset harbor-harbor-database -n harbor-system --patch "$(cat yml/harbor-init-patch.yaml)"
 ```
+Confirm harber installed and running then create the harbor project and user
+```bash
+#Create conexp project in Harbor
+ curl -u admin:admin -i -k -X POST "$externalUrl/api/v2.0/projects" \
+      -d "@json/harbor-project.json" \
+      -H "Content-Type: application/json"
 
-Update the command on *initContainers* to
+#Create conexp user in Harbor
+ curl -u admin:admin -i -k -X POST "$externalUrl/api/v2.0/users" \
+      -d "@json/harbor-project-user.json" \
+      -H "Content-Type: application/json"
 
-```
-chown -R postgres:postgres /var/lib/postgresql/data; chmod 700 -R /var/lib/postgresql/data
-```
+#Add the conexp user to the conexp project in Harbor
 
+conexpid=$(curl -u admin:admin -k -s -X GET "$externalUrl/api/v2.0/projects?name=conexp" | jq '.[0].project_id')
+echo "project_id: $conexpid"
+
+ curl -u admin:admin -i -k -X POST "$externalUrl/api/v2.0/projects/$conexpid/members" \
+      -d "@json/harbor-project-member.json" \
+      -H "Content-Type: application/json"
 ```
-Now retrieve the Harbor Registry URL: echo $externalUrl
-And use the following credentials:
+Now retrieve the Harbor Registry URL:
+```bash 
+echo $externalUrl
+```
+Use the following credentials to login:\
+admin\
 admin
-admin
-```
 
-##MySQL Installation
+## MySQL Installation
 
 Deploy Mysql
+
 ```
 kubectl create ns mysql
-helm install mysql stable/mysql  --set mysqlRootPassword=FTA@CNCF0n@zure3,mysqlUser=ftacncf,mysqlPassword=FTA@CNCF0n@zure3,mysqlDatabase=conexp-mysql,persistence.storageClass=rook-ceph-block -n mysql
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+
+helm install mysql bitnami/mysql \
+	--namespace mysql \
+	--version 8.5.1 \
+	--set auth.rootPassword=FTA@CNCF0n@zure3 \
+	--set auth.username=ftacncf  \
+	--set auth.password=FTA@CNCF0n@zure3 \
+	--set global.storageClass=rook-ceph-block 
 ```
+
 Create the databases 
-```
-kubectl run -n mysql -i --tty ubuntu --image=ubuntu:16.04 --restart=Never -- bash -il
+```bash
+kubectl run -n mysql -i -t ubuntu --image=ubuntu:18.04 --restart=Never -- bash -il
 apt-get update && apt-get install mysql-client -y
 mysql -h mysql -p
 show databases;
@@ -207,37 +235,15 @@ GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
 
 USE conexpweb;
 GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
+
+# Exit from mysql cli
+exit;
+
+# Exit from the pod
+exit;
 ```
 
-## Vitess Installation (Note: Either do the SQL Installation as above or Vitess, not both)
-
-Clone the Vitess Git repo
-```
-sudo git clone https://github.com/vitessio/vitess.git 
-```
-Navigate to the following folder:
-```
-~/Vitess/vitess/examples/operator
-```
-Run the following kubectl commands:
-```
-kubectl apply -f operator.yaml 
-
-kubectl apply -f 101_initial_cluster.yaml
-```
-Get the POD running the Vitess (from the pf.sh file):
-```
-kubectl get deployment --selector="planetscale.com/component=vtgate"
-```
-Expose the deploy as a svc, get the service YAML, and edit it/clean it
-To Do: Add the example YAML file.
-
-Install MySQL Client Locally
-```
-apt install mysql-client
-```
-
-##OpenFaaS
+## OpenFaaS
 
 ```
 helm repo add openfaas https://openfaas.github.io/faas-netes/
@@ -260,42 +266,47 @@ Install the Nats Connector
 ```
 kubectl apply -f yml/openfaas-nats-connector.yaml
 ```
-##Prometheus
+## Prometheus
 
 ```
 kubectl create ns monitoring
-helm repo add stable https://kubernetes-charts.storage.googleapis.com
-helm install prometheus stable/prometheus-operator -f yml/prometheus-values.yaml -n monitoring
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus prometheus-community/kube-prometheus-stack -f yml/prometheus-values.yaml  \
+  -n monitoring \
+  --version 13.13.0
 ```
 ```
-kubectl port-forward deploy/prometheus-grafana 8080:3000 -n monitoring
-Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
+kubectl port-forward deploy/prometheus-grafana 8070:3000 -n monitoring
+Browse to http://localhost:8070 and use the username/password as admin/FTA@CNCF0n@zure3
 
-kubectl port-forward svc/prometheus-prometheus-oper-prometheus 9090:9090 -n monitoring
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring 
 Browse to http://localhost:9090
 ```
 
-##Jaeger
+## Jaeger
 
 ```
 helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
 helm repo update
 
 kubectl create ns tracing
-helm install jaeger jaegertracing/jaeger -f yml/jaeger-values.yaml -n tracing
+helm install jaeger jaegertracing/jaeger -f yml/jaeger-values.yaml \
+  -n tracing \
+  --version 0.40.1
 ```
 ```
 # Wait for at least ~5 minutes before browsing to the Jaeger UI
-kubectl port-forward svc/jaeger-query 8080:80 -n tracing
-Browse to http://localhost:8080
+kubectl port-forward svc/jaeger-query 8060:80 -n tracing
+Browse to http://localhost:8060
 ```
 
-##Linkerd
+## Linkerd
 
 Deploy Linkered
 ```
 # Install cli
-curl -sL https://run.linkerd.io/install | sh
+curl -sL https://run.linkerd.io/install | sed s/LINKERD2_VERSION=.*/LINKERD2_VERSION=${LINKERD2_VERSION:-stable-2.10.0}/ | sh
 export PATH=$PATH:$HOME/.linkerd2/bin
 linkerd version
 linkerd check --pre
@@ -309,54 +320,47 @@ step certificate create identity.linkerd.cluster.local issuer.crt issuer.key --c
 
 # Install linkerd
 linkerd install --identity-trust-anchors-file ca.crt --identity-issuer-certificate-file issuer.crt --identity-issuer-key-file issuer.key | kubectl apply -f -
+
+# Install linkerd dashboard
+linkerd viz install | kubectl apply -f -
 ```
 
-Integrate Openfaas with Linkerd
+Integrate Openfaas with Linkerd (need to wait for Linker do to come up)
 ```
 kubectl -n openfaas get deploy gateway -o yaml | linkerd inject --skip-outbound-ports=4222 - | kubectl apply -f -
 ```
 
 Integrate Nginx Ingress controller with Linkerd
 ```
-kubectl get deploy/nginx-ingress-controller -n ingress-basic -o yaml | linkerd inject - | kubectl apply -f - 
+kubectl get deploy/nginx-ingress-ingress-nginx-controller -n ingress-basic -o yaml | linkerd inject - | kubectl apply -f - 
 ```
 
 Linkerd metrics integration with Prometheus
 ```
-kubectl create secret generic additional-scrape-configs --from-file=yml/linkerd-prometheus-additional.yaml -n monitoring
-kubectl edit prometheus  prometheus-prometheus-oper-prometheus  -n monitoring
+kubectl create secret generic prometheus-kube-prometheus-prometheus-scrape-confg-linkerd --from-file=additional-scrape-configs.yaml=yml/linkerd-prometheus-additional.yaml -n monitoring
 
-Add the additionalScrapeConfigs as below
-  ....
-  ....
-  serviceMonitorSelector:
-    matchLabels:
-      team: frontend
-  additionalScrapeConfigs:
-    name: additional-scrape-configs
-    key: linkerd-prometheus-additional.yaml
-  ....
-  ....
+kubectl get prometheus prometheus-kube-prometheus-prometheus -n monitoring -o yaml | sed s/prometheus-kube-prometheus-prometheus-scrape-confg/prometheus-kube-prometheus-prometheus-scrape-confg-linkerd/ | kubectl apply -f -
+
 ```
 
 Linkerd integration with Jaeger
 ```
-kubectl  apply -f yml/linkerd-opencesus-collector.yaml -n tracing
+linkerd jaeger install --set collector.jaegerAddr='http://jaeger-collector.tracing:14268/api/traces' | kubectl apply -f -
 
-kubectl annotate namespace openfaas-fn config.linkerd.io/trace-collector=oc-collector.tracing:55678
-kubectl annotate namespace openfaas config.linkerd.io/trace-collector=oc-collector.tracing:55678
-kubectl annotate namespace ingress-basic config.linkerd.io/trace-collector=oc-collector.tracing:55678
+kubectl annotate namespace openfaas-fn config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
+kubectl annotate namespace openfaas config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
+kubectl annotate namespace ingress-basic config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
 ```
 
+Open the dashboard in browser
 ```
-kubectl port-forward svc/linkerd-web 8080:8084 -n linkerd
-Browse to http://localhost:8080
+linkerd viz dashboard
 ```
 
-##Tekton
+## Tekton
 Install Tekton pipelines
 ```
-kubectl apply -f https://storage.googleapis.com/tekton-releases/latest/release.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.21.0/release.yaml
 
 kubectl apply -f yml/tekton-default-configmap.yaml  -n  tekton-pipelines
 kubectl apply -f yml/tekton-pvc-configmap.yaml -n  tekton-pipelines
@@ -364,52 +368,26 @@ kubectl apply -f yml/tekton-feature-flags-configmap.yaml -n  tekton-pipelines
 ```
 Install Tekton Triggers
 ```
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/previous/v0.13.0/release.yaml
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/previous/v0.13.0/interceptors.yaml
 ```
 Install Tekton Dashboard
 ```
-kubectl apply --filename https://github.com/tektoncd/dashboard/releases/download/v0.5.2/tekton-dashboard-release.yaml
+kubectl apply --filename https://github.com/tektoncd/dashboard/releases/download/v0.14.0/tekton-dashboard-release.yaml
 ```
 ```
 kubectl port-forward svc/tekton-dashboard 8080:9097  -n tekton-pipelines
 Browse to http://localhost:8080
 ```
 
-##App Installation
+## App Installation
 
-Create the Project and User in Harbor
-- Login to Harbor
-- Add a new Project with name conexp
-- Add a new User under Administration with username as conexp and password as FTA@CNCF0n@zure3
-- Associate the user with the conexp project under Memebers tab with a Developer role
-
-Build and push the containers
-```
-docker login $registryHost
-conexp
-FTA@CNCF0n@zure3
-
-cd src/Contoso.Expenses.API
-docker build -t $registryHost/conexp/api:latest .
-# Go to Harbor registry and create **conexp** project
-docker push $registryHost/conexp/api:latest
-
-cd ..
-docker build -t $registryHost/conexp/web:latest -f Contoso.Expenses.Web/Dockerfile .
-docker push $registryHost/conexp/web:latest
-
-docker build -t $registryHost/conexp/emaildispatcher:latest -f Contoso.Expenses.OpenFaaS/Dockerfile .
-docker push $registryHost/conexp/emaildispatcher:latest
-
-cd ..
-
-```
-
+Create a namespace for app deployment and annotate it for linkerd and jaeger operations
 ```
 kubectl create ns conexp-mvp
 kubectl annotate namespace conexp-mvp linkerd.io/inject=enabled
 kubectl annotate namespace conexp-mvp config.linkerd.io/skip-outbound-ports="4222"
-kubectl annotate namespace conexp-mvp config.linkerd.io/trace-collector=oc-collector.tracing:55678
+kubectl annotate namespace conexp-mvp config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
 ```
 
 Create the registry credentials in the deployment namespaces
@@ -418,20 +396,18 @@ kubectl create secret docker-registry regcred --docker-server="https://$registry
 kubectl create secret docker-registry regcred --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn
 ```
 
-##Tekton - App Deployment
+## Tekton - App Deployment
 
 ```
 kubectl create ns conexp-mvp-devops
+kubectl apply -f yml/tekton-limit-range.yaml
 
-kubectl apply -f yml/app-webhook-role.yaml -n conexp-mvp-devops
 kubectl apply -f yml/app-admin-role.yaml -n conexp-mvp-devops
-
-kubectl apply -f yml/app-create-ingress.yaml -n conexp-mvp-devops
-kubectl apply -f yml/app-create-webhook.yaml -n conexp-mvp-devops
 ```
 
 Update Secret (basic-user-pass) for registry credentails, TriggerBinding for registry name,namespaces in triggers.yaml
-Create a SendGrid Account and set an API key for use
+Create a SendGrid Account and set an API key for use. Reference this [Link](https://sendgrid.com/) to Create a Free Send Grid Account
+and thus a SendGrid Key
 ```
 sendGridApiKey=<<set the api key>>
 appHostName=$topLevelDomain
@@ -451,31 +427,23 @@ kubectl apply -f yml/app-deploy-rolebinding.yaml -n conexp-mvp
 kubectl apply -f yml/app-deploy-rolebinding.yaml -n openfaas-fn
 ```
 
-Generate PAT token(Settings->Developer settings->Personal access tokens) for the repo -> public_repo, admin:repo_hook, set the pat token below
-```
-patToken=<<set the pat tokne>>
-
-sed -i "s/{patToken}/$patToken/g" yml/app-github-secret.yaml
-
-kubectl apply -f yml/app-github-secret.yaml -n conexp-mvp-devops
-```
-
-set org/user/repo of the source code repo variables below
+Expose the Tekton Event Listener externally through an Ingress for Github to dispatch the push events
 ```
 cicdWebhookHost=$topLevelDomain
 
-gitHubOrg=<<set the name of the github org>>
-gitHubUser=<<set the name of the github user>>
-gitHubRepo=<<set the name of the github repo>>
+sed -i "s/{cicdWebhook}/$cicdWebhookHost/g" yml/tekton-el-ingress.yaml
 
-sed -i "s/{cicdWebhook}/$cicdWebhookHost/g" yml/app-ingress-run.yaml
+kubectl apply -f yml/tekton-el-ingress.yaml -n conexp-mvp-devops
 
-kubectl apply -f yml/app-ingress-run.yaml  -n conexp-mvp-devops
+# Payload URL to be used for creating the webhook
+echo https://$cicdWebhookHost/cd
 
-sed -i "s/{cicdWebhook}/$cicdWebhookHost/g" yml/app-webhook-run.yaml
-sed -i "s/{mygithub-org-replace}/$gitHubOrg/g" yml/app-webhook-run.yaml
-sed -i "s/{mygithub-user-replace}/$gitHubUser/g" yml/app-webhook-run.yaml
-sed -i "s/{mygithub-repo-replace}/$gitHubRepo/g" yml/app-webhook-run.yaml
+Create a webhook in the git repo of the source code by navigating to {Repo} -> Setting -> Webhook -> Add Webhook
+Enter the Payload URL from above, select the Content type as application/json and leavet he rest as defaults
 
-kubectl apply -f yml/app-webhook-run.yaml -n conexp-mvp-devops
+Make a change to the readme.md file and observe the deployment in tekton dashboard
+
 ```
+## Launch the Application
+Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example **uniquename.centralus.cloudapp.azure.com**.
+This will launch the application and you can proceed to create, update, delete expenses.

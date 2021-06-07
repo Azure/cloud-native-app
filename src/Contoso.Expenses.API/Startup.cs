@@ -85,7 +85,7 @@ namespace Contoso.Expenses.API
             {
                 endpoints.MapControllers();
             });
-
+            
             context.Database.EnsureCreated();
         }
     }

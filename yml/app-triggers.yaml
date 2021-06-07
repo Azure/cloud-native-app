@@ -33,7 +33,7 @@ spec:
           name: conexp-pipeline
         podTemplate:
           nodeSelector:
-            kubernetes.io/os: linux
+            kubernetes.io/os: linux         
         params:
           - name: deployment-namespace
             value: $(tt.params.deployment-namespace)
@@ -101,7 +101,7 @@ spec:
       bindings:
         - ref: conexp-pipelinebinding
       template:
-        name: conexp-triggertemplate
+        ref: conexp-triggertemplate        
 ---
 apiVersion: v1
 kind: Secret

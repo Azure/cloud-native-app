@@ -28,7 +28,7 @@ storage:
     ## Use existing secret (ignores previous password)
     # existingSecret:
     ## Cassandra related env vars to be configured on the concerned components
-    env: {}
+    extraEnv: []
       # CASSANDRA_SERVERS: cassandra
       # CASSANDRA_PORT: 9042
       # CASSANDRA_KEYSPACE: jaeger_v1_test
@@ -50,7 +50,7 @@ storage:
     ## Use existing secret (ignores previous password)
     # existingSecret:
     nodesWanOnly: false
-    env: {}
+    extraEnv: []
     ## ES related env vars to be configured on the concerned components
       # ES_SERVER_URLS: http://elasticsearch-master:9200
       # ES_USERNAME: elastic
@@ -115,10 +115,9 @@ schema:
   podLabels: {}
   ## Deadline for cassandra schema creation job
   activeDeadlineSeconds: 300
-  env:
-    MODE: prod
-    # TRACE_TTL: 172800
-    # DEPENDENCIES_TTL: 0
+  extraEnv:
+    - name: MODE
+      value: prod
 
 # For configurable values of the elasticsearch if provisioned, please see:
 # https://github.com/elastic/helm-charts/tree/master/elasticsearch#configuration
@@ -133,7 +132,7 @@ ingester:
   pullPolicy: IfNotPresent
   dnsPolicy: ClusterFirst
   cmdlineParams: {}
-  env: {}
+  extraEnv: []
   replicaCount: 1
   autoscaling:
     enabled: false
@@ -178,7 +177,7 @@ agent:
   image: jaegertracing/jaeger-agent
   pullPolicy: IfNotPresent
   cmdlineParams: {}
-  env: {}
+  extraEnv: []
   daemonset:
     useHostPort: false
   service:
@@ -240,7 +239,7 @@ collector:
   pullPolicy: IfNotPresent
   dnsPolicy: ClusterFirst
   cmdlineParams: {}
-  env: {}
+  extraEnv: []
   replicaCount: 1
   autoscaling:
     enabled: false
@@ -343,7 +342,7 @@ query:
   pullPolicy: IfNotPresent
   dnsPolicy: ClusterFirst
   cmdlineParams: {}
-  env: {}
+  extraEnv: []
   replicaCount: 1
   service:
     annotations: {}

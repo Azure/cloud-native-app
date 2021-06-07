@@ -1255,21 +1255,15 @@ prometheusOperator:
   ## Prometheus-operator image
   ##
   image:
-    repository: quay.io/coreos/prometheus-operator
-    tag: v0.37.0
+    repository: quay.io/prometheus-operator/prometheus-operator
+    tag: v0.45.0
     pullPolicy: IfNotPresent
-
-  ## Configmap-reload image to use for reloading configmaps
-  ##
-  configmapReloadImage:
-    repository: quay.io/coreos/configmap-reload
-    tag: v0.0.1
 
   ## Prometheus-config-reloader image to use for config and rule reloading
   ##
   prometheusConfigReloaderImage:
-    repository: quay.io/coreos/prometheus-config-reloader
-    tag: v0.37.0
+    repository: quay.io/prometheus-operator/prometheus-config-reloader
+    tag: v0.45.0
 
   ## Set the prometheus config reloader side-car CPU limit
   ##
@@ -1500,7 +1494,7 @@ prometheus:
     ##
     image:
       repository: quay.io/prometheus/prometheus
-      tag: v2.15.2
+      tag: v2.24.0
 
     ## Tolerations for use with node taints
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
@@ -1738,7 +1732,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 10Gi
+              storage: 1Gi
     #    selector: {}
 
     ## AdditionalScrapeConfigs allows specifying additional Prometheus scrape configurations. Scrape configurations
