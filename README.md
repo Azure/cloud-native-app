@@ -22,8 +22,6 @@ The CNCF Projects App is a sample expense application simulating a user submitti
 * [GitHub](https://github.com/) - Code Repository
 * Web Front-End & Web API - [.NET Core](https://docs.microsoft.com/en-us/dotnet/core/about)
 
-**TODO** : Need screenshots of app of various screens.
-
 ## Architecture
 Below is the documented CNCF Projects App architecture for reference.
 
