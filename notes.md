@@ -59,7 +59,7 @@ helm install harbor-nginx-ingress ingress-nginx/ingress-nginx \
     --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
     --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
 
-# Label the ingress-basic namespace to disable cert resource validation
+# Label the harbor-ingress-system namespace to disable cert resource validation
 kubectl label namespace harbor-ingress-system cert-manager.io/disable-validation=true
 ```
 
