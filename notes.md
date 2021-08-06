@@ -301,7 +301,7 @@ Browse to http://localhost:8060
 Deploy Linkered
 ```
 # Install cli
-curl -sL https://run.linkerd.io/install | sed s/LINKERD2_VERSION=.*/LINKERD2_VERSION=${LINKERD2_VERSION:-stable-2.10.0}/ | sh
+curl -sL https://run.linkerd.io/install | sed s/LINKERD2_VERSION=.\*/LINKERD2_VERSION=${LINKERD2_VERSION:-stable-2.10.0}/ | sh
 export PATH=$PATH:$HOME/.linkerd2/bin
 linkerd version
 linkerd check --pre
