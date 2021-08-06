@@ -441,4 +441,4 @@ Make a change to the readme.md file and observe the deployment in tekton dashboa
 ```
 ## Launch the Application
 Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example **uniquename.centralus.cloudapp.azure.com**.
-This will launch the application and you can proceed to create, update, delete expenses.
+This will launch the application and you can proceed to create, update, delete expenses. 
