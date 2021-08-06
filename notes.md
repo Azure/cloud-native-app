@@ -205,7 +205,7 @@ Create the databases
 ```bash
 kubectl run -n mysql -i -t ubuntu --image=ubuntu:18.04 --restart=Never -- bash -il
 apt-get update && apt-get install mysql-client -y
-mysql -h mysql -p
+mysql -h mysql --password=FTA@CNCF0n@zure3
 show databases;
 
 CREATE DATABASE conexpweb;
