@@ -1,6 +1,6 @@
 # Setup
 
-Create a Kubernetes Cluster
+Create a Kubernetes cluster with a minimum of 3 nodes and ~8+GB per node (e.g., Standard_DS3_v2)
 
 Fork this repository (needed to enable CD) and clone it
 
