@@ -347,7 +347,7 @@ kubectl annotate namespace openfaas config.linkerd.io/trace-collector=collector.
 kubectl annotate namespace ingress-basic config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
 ```
 
-Open the dashboard in browser
+Open the dashboard in browser (linkerd-viz may take up to ~12 minutes to start)
 ```
 linkerd viz dashboard
 ```
