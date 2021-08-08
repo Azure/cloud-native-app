@@ -308,7 +308,7 @@ linkerd check --pre
 
 # Generate certificates.
 wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
-​sudo dpkg -i step-cli_0.15.2_amd64.deb
+sudo dpkg -i step-cli_0.15.2_amd64.deb
 
 step certificate create identity.linkerd.cluster.local ca.crt ca.key --profile root-ca --no-password --insecure
 step certificate create identity.linkerd.cluster.local issuer.crt issuer.key --ca ca.crt --ca-key ca.key --profile intermediate-ca --not-after 8760h --no-password --insecure
@@ -400,9 +400,7 @@ kubectl apply -f yml/tekton-limit-range.yaml
 kubectl apply -f yml/app-admin-role.yaml -n conexp-mvp-devops
 ```
 
-Update Secret (basic-user-pass) for registry credentails, TriggerBinding for registry name,namespaces in triggers.yaml
-Create a SendGrid Account and set an API key for use. Reference this [Link](https://sendgrid.com/) to Create a Free Send Grid Account
-and thus a SendGrid Key
+Update secret (basic-user-pass) for registry credentails, TriggerBinding for registry name, and namespaces in triggers.yaml. Create a SendGrid Account and set an API key for use. Reference this [link](https://sendgrid.com/) to create a free SendGrid account and get the SendGrid API key.
 ```
 sendGridApiKey=<<set the api key>>
 appHostName=$topLevelDomain
