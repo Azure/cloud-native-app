@@ -432,11 +432,12 @@ kubectl apply -f yml/tekton-el-ingress.yaml -n conexp-mvp-devops
 echo https://$cicdWebhookHost/cd
 ```
 
-Create a Webook in the GitHub repo of the source code by navigating to {Repo} -> Setting -> Webhook -> Add Webhook. Enter the Payload URL from above, select the Content type as **application/json** and leave the rest as defaults
+Create a Webook in the GitHub repo of the source code by navigating to {Repo} -> Setting -> Webhook -> Add Webhook. Enter the Payload URL from above, select the Content type as **application/json** and leave the rest as defaults.
 
-Make a change to the readme.md file and observe the deployment in tekton dashboard
+Make a change to the readme.md file and observe the deployment in Tekton dashboard.
 
-```
 ## Launch the Application
+
 Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example **uniquename.centralus.cloudapp.azure.com**.
+
 This will launch the application and you can proceed to create, update, delete expenses. 
