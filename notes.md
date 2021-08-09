@@ -1,6 +1,6 @@
 # Setup
 
-Create a Kubernetes Cluster
+Create a Kubernetes cluster with a minimum of 3 nodes and ~8+GB per node (e.g., Standard_DS3_v2)
 
 Fork this repository (needed to enable CD) and clone it
 
@@ -59,7 +59,7 @@ helm install harbor-nginx-ingress ingress-nginx/ingress-nginx \
     --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
     --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
 
-# Label the ingress-basic namespace to disable cert resource validation
+# Label the harbor-ingress-system namespace to disable cert resource validation
 kubectl label namespace harbor-ingress-system cert-manager.io/disable-validation=true
 ```
 
@@ -205,7 +205,7 @@ Create the databases
 ```bash
 kubectl run -n mysql -i -t ubuntu --image=ubuntu:18.04 --restart=Never -- bash -il
 apt-get update && apt-get install mysql-client -y
-mysql -h mysql -p
+mysql -h mysql --password=FTA@CNCF0n@zure3
 show databases;
 
 CREATE DATABASE conexpweb;
@@ -301,14 +301,14 @@ Browse to http://localhost:8060
 Deploy Linkered
 ```
 # Install cli
-curl -sL https://run.linkerd.io/install | sed s/LINKERD2_VERSION=.*/LINKERD2_VERSION=${LINKERD2_VERSION:-stable-2.10.0}/ | sh
+curl -sL https://run.linkerd.io/install | sed s/LINKERD2_VERSION=.\*/LINKERD2_VERSION=${LINKERD2_VERSION:-stable-2.10.0}/ | sh
 export PATH=$PATH:$HOME/.linkerd2/bin
 linkerd version
 linkerd check --pre
 
 # Generate certificates.
 wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
-​sudo dpkg -i step-cli_0.15.2_amd64.deb
+sudo dpkg -i step-cli_0.15.2_amd64.deb
 
 step certificate create identity.linkerd.cluster.local ca.crt ca.key --profile root-ca --no-password --insecure
 step certificate create identity.linkerd.cluster.local issuer.crt issuer.key --ca ca.crt --ca-key ca.key --profile intermediate-ca --not-after 8760h --no-password --insecure
@@ -347,7 +347,7 @@ kubectl annotate namespace openfaas config.linkerd.io/trace-collector=collector.
 kubectl annotate namespace ingress-basic config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
 ```
 
-Open the dashboard in browser
+Open the dashboard in browser (linkerd-viz may take up to ~12 minutes to start)
 ```
 linkerd viz dashboard
 ```
@@ -400,9 +400,7 @@ kubectl apply -f yml/tekton-limit-range.yaml
 kubectl apply -f yml/app-admin-role.yaml -n conexp-mvp-devops
 ```
 
-Update Secret (basic-user-pass) for registry credentails, TriggerBinding for registry name,namespaces in triggers.yaml
-Create a SendGrid Account and set an API key for use. Reference this [Link](https://sendgrid.com/) to Create a Free Send Grid Account
-and thus a SendGrid Key
+Update secret (basic-user-pass) for registry credentails, TriggerBinding for registry name, and namespaces in triggers.yaml. Create a SendGrid Account and set an API key for use. Reference this [link](https://sendgrid.com/) to create a free SendGrid account and get the SendGrid API key.
 ```
 sendGridApiKey=<<set the api key>>
 appHostName=$topLevelDomain
@@ -432,13 +430,14 @@ kubectl apply -f yml/tekton-el-ingress.yaml -n conexp-mvp-devops
 
 # Payload URL to be used for creating the webhook
 echo https://$cicdWebhookHost/cd
-
-Create a webhook in the git repo of the source code by navigating to {Repo} -> Setting -> Webhook -> Add Webhook
-Enter the Payload URL from above, select the Content type as application/json and leavet he rest as defaults
-
-Make a change to the readme.md file and observe the deployment in tekton dashboard
-
 ```
+
+Create a Webook in the GitHub repo of the source code by navigating to {Repo} -> Setting -> Webhook -> Add Webhook. Enter the Payload URL from above, select the Content type as **application/json** and leave the rest as defaults.
+
+Make a change to the readme.md file and observe the deployment in Tekton dashboard.
+
 ## Launch the Application
+
 Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example **uniquename.centralus.cloudapp.azure.com**.
-This will launch the application and you can proceed to create, update, delete expenses.
+
+This will launch the application and you can proceed to create, update, delete expenses. 
