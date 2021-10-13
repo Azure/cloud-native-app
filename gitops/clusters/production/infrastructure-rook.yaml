@@ -13,3 +13,8 @@ spec:
   path: ./gitops/infrastructure/rook
   prune: true
   validation: client
+  healthChecks:
+    - apiVersion: ceph.rook.io/v1
+      kind: CephCluster
+      name: rook-ceph
+      namespace: rook-ceph

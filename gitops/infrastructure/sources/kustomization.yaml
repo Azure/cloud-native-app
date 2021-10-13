@@ -3,3 +3,9 @@ kind: Kustomization
 namespace: flux-system
 resources:
   - ingress-nginx.yaml
+  - jetstack.yaml
+  - harbor.yaml
+  - bitnami.yaml
+  - openfaas.yaml
+  - prometheus-community.yaml
+  - jaegertracing.yaml
