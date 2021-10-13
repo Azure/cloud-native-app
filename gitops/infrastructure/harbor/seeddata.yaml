@@ -1,0 +1,74 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-project
+spec:
+  parallelism: 1    
+  completions: 1    
+  template:         
+    metadata:
+      name: create-project
+    spec:
+      volumes:
+      - name: create-project-scripts-volume
+        configMap:
+          name: create-project-scripts
+      containers:
+      - name: create-project-job
+        image: alpine
+        volumeMounts:
+          - mountPath: /create-project-scripts
+            name: create-project-volume
+        env:
+          - name: HOME
+            value: /tmp
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "scripts in /create-project-scripts"
+          ls -lh /create-project-scripts
+          echo "copy scripts to /tmp"
+          cp /create-project-scripts/*.json /tmp
+          cp /create-project-scripts/*.sh /tmp
+          echo "apply 'chmod +x' to /tmp/*.sh"
+          chmod +x /tmp/*.sh
+          echo "execute create-project.sh now"
+          /tmp/create-project.sh
+      restartPolicy: Never
+---
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    create-project.sh: |
+      echo "script-one.sh"
+      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects" -d "@harbor-project.json" -H "Content-Type: application/json"
+      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/users" -d "@harbor-project-user.json" -H "Content-Type: application/json"
+      conexpid=$(curl -u admin:admin -k -s -X GET "$externalUrl/api/v2.0/projects?name=conexp" | jq '.[0].project_id')
+      echo "project_id: $conexpid"
+      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects/$conexpid/members" -d "@harbor-project-member.json" -H "Content-Type: application/json"
+    harbor-project.json: |
+      {
+        "metadata": {
+          "public": "false"
+        },
+        "project_name": "conexp",
+        "owner_id": 1,
+        "owner_name": "admin"
+      }    
+    harbor-project-user.json: |
+      {
+          "username": "conexp",
+          "email": "conexp@host.local",
+          "realname": "co nexp",
+          "password": "FTA@CNCF0n@zure3"
+      }      
+    harbor-project-member.json: |
+      {"role_id":2,"member_user":{"username":"conexp"}}
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    name:  create-project-scripts
+kind: List
+metadata: {}
