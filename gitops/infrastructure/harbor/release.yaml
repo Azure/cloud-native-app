@@ -17,23 +17,7 @@ spec:
   interval: 1h0m0s
   install:
     remediation:
-      retries: 3
-  postRenderers:
-    - kustomize:
-        patchesStrategicMerge:
-          - kind: StatefulSet
-            apiVersion: apps/v1
-            metadata:
-              name: harbor-harbor-database
-            spec:
-              template:
-                spec:
-                  initContainers:
-                  - args:
-                    - -c
-                    - '[ -e /var/lib/postgresql/data/postgresql.conf ] && [ ! -d /var/lib/postgresql/data/pgdata] && mkdir -m 0700 /var/lib/postgresql/data/pgdata && mv /var/lib/postgresql/data/* /var/lib/postgresql/data/pgdata/ || true'
-                    - chown -R postgres:postgres /var/lib/postgresql/data/pgdata && chmod 0700 -R /var/lib/postgresql/data/pgdata
-                    name: data-migrator       
+      retries: 3 
   values:
     expose:
       tls:
@@ -44,22 +28,22 @@ spec:
           cert-manager.io/cluster-issuer: letsencrypt
         hosts:
           core: "${registryHost}"
-      notary:
-        enabled: false
-      trivy:
-        enabled: false
-      persistence:
-        enabled: true
-        persistentVolumeClaim:
-          chartmuseum:
-            storageClass: rook-ceph-block
-          jobservice:
-            storageClass: rook-ceph-block
-          database:
-            storageClass: rook-ceph-block
-          redis:
-            storageClass: rook-ceph-block
-          registry:
-            storageClass: rook-ceph-block
-      externalURL: "${externalUrl}"
-      harborAdminPassword: admin
+    notary:
+      enabled: false
+    trivy:
+       enabled: false
+    persistence:
+      enabled: true
+      persistentVolumeClaim:
+        chartmuseum:
+          storageClass: rook-ceph-block
+        jobservice:
+          storageClass: rook-ceph-block
+        database:
+          storageClass: rook-ceph-block
+        redis:
+          storageClass: rook-ceph-block
+        registry:
+          storageClass: rook-ceph-block
+    externalURL: "${externalUrl}"
+    harborAdminPassword: admin
