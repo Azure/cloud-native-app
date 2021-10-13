@@ -14,15 +14,7 @@ spec:
   prune: true
   validation: client
   healthChecks:
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: rook-ceph-osd-0
+    - apiVersion: ceph.rook.io/v1
+      kind: CephCluster
+      name: rook-ceph
       namespace: rook-ceph
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: rook-ceph-osd-1
-      namespace: rook-ceph
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: rook-ceph-osd-2
-      namespace: rook-ceph            
