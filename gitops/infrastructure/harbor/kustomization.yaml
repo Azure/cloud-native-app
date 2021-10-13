@@ -3,6 +3,10 @@ kind: Kustomization
 namespace: harbor-system
 patches:
 - patch: |-
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      name: harbor-harbor-database
     spec:
       template:
         spec:
