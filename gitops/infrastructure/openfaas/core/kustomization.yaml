@@ -10,3 +10,5 @@ configMapGenerator:
 - name: helm-values
   files:
   - ../../../../yml/openfaas-values.yaml
+generatorOptions:
+  disableNameSuffixHash: true
