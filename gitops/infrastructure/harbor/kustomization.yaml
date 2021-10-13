@@ -1,8 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: harbor-system
-patches:
-- patch: |-
+patchesStrategicMerge:
+- |-
     apiVersion: apps/v1
     kind: StatefulSet
     metadata:
@@ -15,11 +15,6 @@ patches:
             - -c
             - chown -R postgres:postgres /var/lib/postgresql/data/pgdata && chmod 0700 -R /var/lib/postgresql/data/pgdata
             name: data-migrator
-  target:
-    group: apps
-    version: v1
-    kind: StatefulSet
-    name: harbor-harbor-database
 resources:
   - namespace.yaml
   - release.yaml
