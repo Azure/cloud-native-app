@@ -1,13 +1,15 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
 metadata:
-  name: infrastructure
+  name: infrastructure-rook
   namespace: flux-system
 spec:
   interval: 10m0s
+  dependsOn:
+    - name: infrastructure-nginx
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./gitops/infrastructure
+  path: ./gitops/infrastructure/rook
   prune: true
   validation: client
