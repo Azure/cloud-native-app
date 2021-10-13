@@ -1,2 +1,3 @@
 Dockerfile
 .cnab/
+./gitops/cluster/production/flux-system
