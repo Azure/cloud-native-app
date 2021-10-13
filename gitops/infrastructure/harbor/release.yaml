@@ -18,21 +18,6 @@ spec:
   install:
     remediation:
       retries: 3
-  postRenderers:
-    - kustomize:
-        patchesStrategicMerge:
-          - kind: StatefulSet
-            apiVersion: apps/v1
-            metadata:
-              name: harbor-harbor-database
-            spec:
-              template:
-                spec:
-                  initContainers:
-                  - args:
-                    - -c
-                    - chown -R postgres:postgres /var/lib/postgresql/data/pgdata && chmod 0700 -R /var/lib/postgresql/data/pgdata
-                    name: data-migrator  
   values:
     expose:
       tls:
