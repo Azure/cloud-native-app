@@ -22,4 +22,4 @@ spec:
     - apiVersion: helm.toolkit.fluxcd.io/v1beta1
       kind: HelmRelease
       name: harbor
-      namespace: harbor
+      namespace: harbor-system
