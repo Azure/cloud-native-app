@@ -1,0 +1,18 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: infrastructure-seed
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  dependsOn:
+    - name: infrastructure-harbor
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./gitops/infrastructure/seed
+  postBuild:
+    substitute:
+      externalUrl: "https://harbor-cna-gitops.eastus.cloudapp.azure.com"  
+  prune: true
+  validation: client
