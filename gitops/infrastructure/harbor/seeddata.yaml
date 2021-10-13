@@ -18,7 +18,7 @@ spec:
         image: alpine
         volumeMounts:
           - mountPath: /create-project-scripts
-            name: create-project-volume
+            name: create-project-scripts-volume
         env:
           - name: HOME
             value: /tmp
