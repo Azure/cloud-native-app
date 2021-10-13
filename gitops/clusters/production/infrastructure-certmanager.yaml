@@ -11,6 +11,9 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./gitops/infrastructure/cert-manager
+  postBuild:
+    substitute:
+      cluster_issuer_email: "srpadala@microsoft.com"  
   prune: true
   validation: client
   healthChecks:
