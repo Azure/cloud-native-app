@@ -5,7 +5,7 @@ metadata:
   name: harbor-nginx-ingress
   namespace: harbor-ingress-system
 spec:
-  releaseName: nginx-ingress
+  releaseName: harbor-nginx-ingress
   chart:
     spec:
       chart: ingress-nginx
