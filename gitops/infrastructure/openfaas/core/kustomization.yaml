@@ -5,8 +5,8 @@ resources:
   - namespace.yaml
   - secret.yaml
   - release.yaml
-  - ../../../yml/openfaas-nats-connector.yaml
+  - ../../../../yml/openfaas-nats-connector.yaml
 configMapGenerator:
 - name: helm-values
   files:
-  - ../../../yml/openfaas-values.yaml
+  - ../../../../yml/openfaas-values.yaml
