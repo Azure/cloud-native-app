@@ -19,3 +19,4 @@ patches:
 resources:
   - namespace.yaml
   - release.yaml
+  - seeddata.yaml
