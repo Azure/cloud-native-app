@@ -1,0 +1,75 @@
+apiVersion: batch/v1
+kind: Job
+namespace: mysql
+metadata:
+  name: mysql-seed
+  namespace: mysql
+spec:
+  parallelism: 1    
+  completions: 1    
+  template:         
+    metadata:
+      name: mysql-seed
+    spec:
+      volumes:
+      - name: mysql-seed-scripts-volume
+        configMap:
+          name: mysql-seed-scripts
+      containers:
+      - name: mysql-seed-job
+        image: ubuntu:18.04
+        volumeMounts:
+          - mountPath: /mysql-seed-scripts
+            name: mysql-seed-scripts-volume
+        env:
+          - name: HOME
+            value: /tmp
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "scripts in /mysql-seed-scripts"
+          ls -lh /mysql-seed-scripts
+          echo "copy scripts to /tmp"
+          cp /mysql-seed-scripts/*.sh /tmp
+          echo "apply 'chmod +x' to /tmp/*.sh"
+          chmod +x /tmp/*.sh
+          echo "execute mysql-seed.sh now"
+          /tmp/mysql-seed.sh
+      restartPolicy: Never
+---
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    mysql-seed.sh: |
+      echo "create-db.sh"
+      apt-get update && apt-get install mysql-client -y
+      mysql -h mysql --password=FTA@CNCF0n@zure3
+      show databases;
+      CREATE DATABASE conexpweb;
+      CREATE DATABASE conexpapi;
+      USE conexpapi;
+      CREATE TABLE CostCenters(
+        CostCenterId int(11)  NOT NULL,
+        SubmitterEmail text NOT NULL,
+        ApproverEmail text NOT NULL,
+        CostCenterName text NOT NULL,
+        PRIMARY KEY ( CostCenterId )
+      ); 
+      INSERT INTO CostCenters (CostCenterId, SubmitterEmail,ApproverEmail,CostCenterName)  values (1, 'user1@mycompany.com', 'user1@mycompany.com','123E42');
+      INSERT INTO CostCenters (CostCenterId, SubmitterEmail,ApproverEmail,CostCenterName)  values (2, 'user2@mycompany.com', 'user2@mycompany.com','456C14');
+      INSERT INTO CostCenters (CostCenterId, SubmitterEmail,ApproverEmail,CostCenterName)  values (3, 'user3@mycompany.com', 'user3@mycompany.com','456C14');
+      USE conexpapi;
+      GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
+      USE conexpweb;
+      GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
+
+      exit;
+
+  kind: ConfigMap
+  metadata:
+    name: mysql-seed-scripts
+    namespace: mysql
+kind: List
+metadata: {}
