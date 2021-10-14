@@ -44,6 +44,9 @@ items:
   data:
     harbor-seed.sh: |
       echo "script-one.sh"
+      apk update
+      apk upgrade
+      apk add curl
       curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects" -d "@harbor-project.json" -H "Content-Type: application/json"
       curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/users" -d "@harbor-project-user.json" -H "Content-Type: application/json"
       conexpid=$(curl -u admin:admin -k -s -X GET "$externalUrl/api/v2.0/projects?name=conexp" | jq '.[0].project_id')
