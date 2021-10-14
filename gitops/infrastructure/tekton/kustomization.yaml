@@ -5,7 +5,6 @@ resources:
   - ../../../yml/tekton-default-configmap.yaml
   - ../../../yml/tekton-pvc-configmap.yaml
   - ../../../yml/tekton-feature-flags-configmap.yaml
-  - ../../../yml/rook-storageclass.yaml
   - https://storage.googleapis.com/tekton-releases/triggers/previous/v0.13.0/release.yaml
   - https://storage.googleapis.com/tekton-releases/triggers/previous/v0.13.0/interceptors.yaml
   - https://github.com/tektoncd/dashboard/releases/download/v0.14.0/tekton-dashboard-release.yaml
