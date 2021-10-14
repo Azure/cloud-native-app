@@ -1,10 +1,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: openfaas
+  name: conexp-mvp
   annotations:
     linkerd.io/inject: enabled
     config.linkerd.io/opaque-ports: "4222"
-  labels:
-    role: openfaas-system
-    access: openfaas-system
+    config.linkerd.io/trace-collector: "collector.linkerd-jaeger:55678"
+
