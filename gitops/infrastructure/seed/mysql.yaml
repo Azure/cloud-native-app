@@ -1,6 +1,5 @@
 apiVersion: batch/v1
 kind: Job
-namespace: mysql
 metadata:
   name: mysql-seed
   namespace: mysql
