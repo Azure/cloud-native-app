@@ -23,3 +23,12 @@ spec:
   values:
     controller:
       replicaCount: 2
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - kind: Deployment
+            apiVersion: apps/v1
+            metadata:
+              name: nginx-ingress-ingress-nginx-controller 
+              annotations:
+                linkerd.io/inject: enabled      
