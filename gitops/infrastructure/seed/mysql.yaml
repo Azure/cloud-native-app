@@ -42,9 +42,10 @@ items:
 - apiVersion: v1
   data:
     mysql-seed.sh: |
+      #!/bin/bash
       echo "create-db.sh"
       apt-get update && apt-get install mysql-client -y
-      mysql -h mysql --password=FTA@CNCF0n@zure3
+      mysql -h mysql --password=FTA@CNCF0n@zure3 <<EOFMYSQL
       show databases;
       CREATE DATABASE conexpweb;
       CREATE DATABASE conexpapi;
@@ -64,7 +65,7 @@ items:
       USE conexpweb;
       GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
 
-      exit;
+      EOFMYSQL
 
   kind: ConfigMap
   metadata:
