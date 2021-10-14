@@ -1,16 +1,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
 metadata:
-  name: infrastructure-certmanager
+  name: infrastructure-linkerd
   namespace: flux-system
 spec:
   interval: 10m0s
-  dependsOn:
-    - name: infrastructure-nginx
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./gitops/infrastructure/cert-manager
+  path: ./gitops/infrastructure/linkerd
   postBuild:
     substitute:
       cert_expiry: "2022-10-13T22:48:42Z"  
