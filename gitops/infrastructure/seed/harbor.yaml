@@ -70,6 +70,6 @@ items:
   kind: ConfigMap
   metadata:
     name:  harbor-seed-scripts
-    namespace: harbor-ingress-system
+    namespace: harbor-system
 kind: List
 metadata: {}
