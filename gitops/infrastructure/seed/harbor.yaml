@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: harbor-seed
+  namespace: harbor-system
 spec:
   parallelism: 1    
   completions: 1    
@@ -68,7 +69,7 @@ items:
       {"role_id":2,"member_user":{"username":"conexp"}}
   kind: ConfigMap
   metadata:
-    creationTimestamp: null
     name:  harbor-seed-scripts
+    namespace: harbor-ingress-system
 kind: List
 metadata: {}
