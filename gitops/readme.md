@@ -34,20 +34,26 @@ kubectl -n linkerd create secret generic certs \
 
 cd ../../..
 ```
-
-
-
-Update the substitution variables in yamls bleow
-infrastructure-certmanager.yaml
-infrastructure-harbor.yaml
+Set the variables required for the deployment
 
 ```bash
+
+# Email to use for LetsEncrypt
+cluster_issuer_email="<<EMAIL>"
+# FQDN to assign to the Harbor Ingress. Eg. {uniquename}.{region}.cloudapp.azure.com if assigning through the Configuration blade of a Azure PublicIP
+registryHost="FQDN"
+
+
+externalUrl=https://$registryHost
 exp=$(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")
 sed -i "s/{cert_expiry}/$exp/g" gitops/clusters/production/infrastructure-linkerd.yaml
+sed -i "s/{registryHost}/$registryHost/g" gitops/clusters/production/infrastructure-harbor.yaml
+sed -i "s/{externalUrl}/$externalUrl/g" gitops/clusters/production/infrastructure-harbor.yaml
+sed -i "s/{externalUrl}/$externalUrl/g" gitops/clusters/production/infrastructure-seed.yaml
+sed -i "s/{cluster_issuer_email}/$cluster_issuer_email/g" gitops/clusters/production/infrastructure-certmanager.yaml
 ```
 
 ### Bootstrap
-- Fork the Repo
 - Create a PAT token in Github
 - Run the bootstrap
 

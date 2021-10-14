@@ -30,8 +30,7 @@ spec:
           echo "scripts in /harbor-seed-scripts"
           ls -lh /harbor-seed-scripts
           echo "copy scripts to /tmp"
-          mkdir json
-          cp /harbor-seed-scripts/*.json /json
+          cp /harbor-seed-scripts/*.json /tmp
           cp /harbor-seed-scripts/*.sh /tmp
           echo "apply 'chmod +x' to /tmp/*.sh"
           chmod +x /tmp/*.sh
@@ -48,11 +47,11 @@ items:
       apk update
       apk upgrade
       apk add curl
-      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects" -d "@json/harbor-project.json" -H "Content-Type: application/json"
-      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/users" -d "@json/harbor-project-user.json" -H "Content-Type: application/json"
+      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects" -d "@/tmp/harbor-project.json" -H "Content-Type: application/json"
+      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/users" -d "@/tmp/harbor-project-user.json" -H "Content-Type: application/json"
       conexpid=$(curl -u admin:admin -k -s -X GET "$externalUrl/api/v2.0/projects?name=conexp" | jq '.[0].project_id')
       echo "project_id: $conexpid"
-      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects/$conexpid/members" -d "@json/harbor-project-member.json" -H "Content-Type: application/json"
+      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects/$conexpid/members" -d "@/tmp/harbor-project-member.json" -H "Content-Type: application/json"
     harbor-project.json: |
       {
         "metadata": {
