@@ -34,6 +34,7 @@ kubectl -n linkerd create secret generic certs \
 
 cd ../../..
 ```
+
 Set the variables required for the deployment
 
 ```bash
@@ -54,6 +55,7 @@ sed -i "s/{cluster_issuer_email}/$cluster_issuer_email/g" gitops/clusters/produc
 ```
 
 ### Bootstrap
+
 - Create a PAT token in Github
 - Run the bootstrap
 
