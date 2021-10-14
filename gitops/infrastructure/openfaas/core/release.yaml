@@ -27,7 +27,8 @@ spec:
           - kind: Deployment
             apiVersion: apps/v1
             metadata:
-              name: gateway 
+              name: gateway
+              namespace: openfaas
               annotations:
                 config.linkerd.io/opaque-ports: "4222"
                 linkerd.io/inject: enabled
