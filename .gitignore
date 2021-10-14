@@ -1,3 +1,5 @@
 Dockerfile
 .cnab/
-./gitops/cluster/production/flux-system
+gitops/cluster/production/flux-system
+gitops/infrastructure/linkerd/*.crt
+gitops/infrastructure/linkerd/*.key

@@ -21,3 +21,14 @@ spec:
   - kind: ConfigMap
     name: helm-values
     valuesKey: openfaas-values.yaml
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - kind: Deployment
+            apiVersion: apps/v1
+            metadata:
+              name: gateway 
+              annotations:
+                config.linkerd.io/opaque-ports: "4222"
+                linkerd.io/inject: enabled
+
