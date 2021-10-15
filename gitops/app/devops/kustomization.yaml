@@ -33,11 +33,11 @@ patches:
       group: tekton.dev
       version: v1alpha1
       kind: Task
-      name: deploy-using-kubectl	  
+      name: deploy-using-kubectl
   - patch: |-
       - op: replace
         path: /metadata/annotations/tekton.dev~1docker-0
-        value: "http://${registryHost}"                        
+        value: "https://${registryHost}"                        
     target:
       version: v1
       kind: Secret
