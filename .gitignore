@@ -1,5 +1,6 @@
 Dockerfile
 .cnab/
+.vscode/
 gitops/cluster/production/flux-system
 gitops/infrastructure/linkerd/*.crt
 gitops/infrastructure/linkerd/*.key
