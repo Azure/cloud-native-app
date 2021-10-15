@@ -24,3 +24,8 @@ spec:
     controller:
       ingressClass: harbor-nginx
       replicaCount: 2
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+    defaultBackend:
+      nodeSelector:
+        beta.kubernetes.io/os: linux
