@@ -22,3 +22,5 @@ spec:
   # https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/values.yaml
   values:
     installCRDs: true
+    nodeSelector:
+      beta.kubernetes.io/os: linux
