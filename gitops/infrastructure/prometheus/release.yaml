@@ -21,3 +21,34 @@ spec:
   - kind: ConfigMap
     name: helm-values
     valuesKey: prometheus-values.yaml
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - kind: ServiceMonitor
+            apiVersion: monitoring.coreos.com/v1
+            metadata:
+              name: prometheus-kube-prometheus-kubelet
+            spec:
+              endpoints:
+              - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+                interval: 10s
+                port: https-metrics
+                scheme: https
+                tlsConfig:
+                  insecureSkipVerify: true
+              - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+                honorLabels: true
+                interval: 10s
+                path: /metrics/cadvisor
+                port: https-metrics
+                scheme: https
+                tlsConfig:
+                  insecureSkipVerify: true
+        patchesStrategicMerge:
+          - kind: Prometheus
+            apiVersion: monitoring.coreos.com/v1
+            metadata:
+              name: prometheus-kube-prometheus-prometheus
+            spec:
+              additionalScrapeConfigs:
+                name: prometheus-kube-prometheus-prometheus-scrape-confg-linkerd                
