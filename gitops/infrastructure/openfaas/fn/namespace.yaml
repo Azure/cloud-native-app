@@ -4,8 +4,6 @@ metadata:
   name: openfaas-fn
   annotations:
     linkerd.io/inject: enabled
-    config.linkerd.io/skip-inbound-ports: "4222"
-    config.linkerd.io/skip-outbound-ports: "4222"
+    config.linkerd.io/opaque-ports: "4222"
   labels:
-    istio-injection: enabled
     role: openfaas-fn
