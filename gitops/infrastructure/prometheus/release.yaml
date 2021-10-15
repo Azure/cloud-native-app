@@ -44,7 +44,6 @@ spec:
                 scheme: https
                 tlsConfig:
                   insecureSkipVerify: true
-        patchesStrategicMerge:
           - kind: Prometheus
             apiVersion: monitoring.coreos.com/v1
             metadata:
