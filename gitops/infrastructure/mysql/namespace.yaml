@@ -2,5 +2,3 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: mysql
-  labels:
-    cert-manager.io/disable-validation: "true"
