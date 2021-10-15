@@ -33,6 +33,8 @@ spec:
       targetPath: identity.issuer.tls.keyPEM      
   values:
     installNamespace: false
+    prometheus:
+      enabled: false
     identity:
       issuer:
         crtExpiry: ${cert_expiry}    

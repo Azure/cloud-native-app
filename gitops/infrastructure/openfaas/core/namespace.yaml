@@ -5,6 +5,7 @@ metadata:
   annotations:
     linkerd.io/inject: enabled
     config.linkerd.io/opaque-ports: "4222"
+    config.linkerd.io/trace-collector: collector.linkerd-jaeger:55678
   labels:
     role: openfaas-system
     access: openfaas-system

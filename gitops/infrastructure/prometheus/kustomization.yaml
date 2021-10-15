@@ -10,3 +10,7 @@ configMapGenerator:
   - ../../../yml/prometheus-values.yaml
 generatorOptions:
   disableNameSuffixHash: true
+secretGenerator:
+- name: prometheus-kube-prometheus-prometheus-scrape-confg-linkerd
+  files:
+  - additional-scrape-configs.yaml=../../../yml/linkerd-prometheus-additional.yaml
