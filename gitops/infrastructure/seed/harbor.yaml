@@ -16,7 +16,7 @@ spec:
           name: harbor-seed-scripts
       containers:
       - name: harbor-seed-job
-        image: alpine
+        image: ubuntu:18.04
         volumeMounts:
           - mountPath: /harbor-seed-scripts
             name: harbor-seed-scripts-volume
@@ -44,9 +44,7 @@ items:
   data:
     harbor-seed.sh: |
       echo "script-one.sh"
-      apk update
-      apk upgrade
-      apk add curl
+      apt update && apt -y install curl && apt -y install jq
       curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects" -d "@/tmp/harbor-project.json" -H "Content-Type: application/json"
       curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/users" -d "@/tmp/harbor-project-user.json" -H "Content-Type: application/json"
       conexpid=$(curl -u admin:admin -k -s -X GET "$externalUrl/api/v2.0/projects?name=conexp" | jq '.[0].project_id')
