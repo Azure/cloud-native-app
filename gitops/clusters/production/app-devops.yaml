@@ -14,6 +14,9 @@ spec:
   path: ./gitops/app/devops
   postBuild:
     substitute:
-      cluster_issuer_email: "srpadala@microsoft.com"  
+      cicdWebhookHost : "app-cna-gitops.eastus.cloudapp.azure.com"
+      registryHost: "harbor-cna-gitops.eastus.cloudapp.azure.com"
+      appHostName: "app-cna-gitops.eastus.cloudapp.azure.com"
+      sendGridApiKey: "JustAnotherKey"  
   prune: true
   validation: client

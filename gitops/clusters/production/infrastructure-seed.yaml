@@ -13,6 +13,6 @@ spec:
   path: ./gitops/infrastructure/seed
   postBuild:
     substitute:
-      externalUrl: "https://harbor-cna-gitops.eastus.cloudapp.azure.com"  
+      externalUrl: "https://harbor-cna-gitops.eastus.cloudapp.azure.com" 
   prune: true
   validation: client

@@ -33,6 +33,9 @@ kubectl -n linkerd create secret generic certs \
 > certs.yaml
 
 cd ../../..
+
+
+
 ```
 
 Set the variables required for the deployment
@@ -40,19 +43,44 @@ Set the variables required for the deployment
 ```bash
 
 # Email to use for LetsEncrypt
-cluster_issuer_email="<<EMAIL>"
+cluster_issuer_email="<<EMAIL>>"
 # FQDN to assign to the Harbor Ingress. Eg. {uniquename}.{region}.cloudapp.azure.com if assigning through the Configuration blade of a Azure PublicIP
-registryHost="FQDN"
+registryHost="<<FQDN>>"
+# sendGrid API Key for the app to send emails
+sendGridApiKey="<<set the api key>>"
+# FQDN to assign to the app Eg. {uniquename}.{region}.cloudapp.azure.com if assigning through the Configuration blade of a Azure PublicIP
+appHostName="<<FQDN>>"
 
 
-externalUrl=https://$registryHost
+registryUrl=https://$registryHost
 exp=$(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")
 sed -i "s/{cert_expiry}/$exp/g" gitops/clusters/production/infrastructure-linkerd.yaml
 sed -i "s/{registryHost}/$registryHost/g" gitops/clusters/production/infrastructure-harbor.yaml
-sed -i "s/{externalUrl}/$externalUrl/g" gitops/clusters/production/infrastructure-harbor.yaml
-sed -i "s/{externalUrl}/$externalUrl/g" gitops/clusters/production/infrastructure-seed.yaml
+sed -i "s%{registryUrl}%$registryUrl%g" gitops/clusters/production/infrastructure-harbor.yaml
+sed -i "s%{registryUrl}%$registryUrl%g" gitops/clusters/production/infrastructure-seed.yaml
 sed -i "s/{cluster_issuer_email}/$cluster_issuer_email/g" gitops/clusters/production/infrastructure-certmanager.yaml
+
+
+sed -i "s/{cicdWebhookHost}/$appHostName/g" gitops/clusters/production/app-devops.yaml
+sed -i "s/{registryHost}/$registryHost/g" gitops/clusters/production/app-devops.yaml
+sed -i "s/{appHostName}/$appHostName/g" gitops/clusters/production/app-devops.yaml
+sed -i "s/{sendGridApiKey}/$sendGridApiKey/g" gitops/clusters/production/app-devops.yaml
+
+cd gitops/app/core
+
+kubectl create secret docker-registry regcred \
+--docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp -oyaml --dry-run=client \
+> regcred-conexp.yaml
+
+kubectl create secret docker-registry regcred \
+--docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn -oyaml --dry-run=client \
+> regcred-openfaas.yaml
+
+cd ../../..
+
 ```
+
+Commit the Repo
 
 ### Bootstrap
 
