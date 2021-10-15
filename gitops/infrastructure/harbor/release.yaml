@@ -36,6 +36,7 @@ spec:
   values:
     expose:
       tls:
+        certSource: secret
         secret:
           secretName: ingress-cert-harbor
       ingress:
