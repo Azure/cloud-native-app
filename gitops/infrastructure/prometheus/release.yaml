@@ -14,6 +14,41 @@ spec:
         name: prometheus-community
         namespace: flux-system
   interval: 1h0m0s
+  postRenderers:
+    - kustomize:
+        patchesJson6902:
+          - target:
+              version: v1
+              kind: Prometheus
+              name: prometheus-kube-prometheus-prometheus
+            patch:
+              - op: replace
+                path: /spec/additionalScrapeConfigs
+                value: 
+                  key: additional-scrape-configs.yaml
+                  name: prometheus-kube-prometheus-prometheus-scrape-confg-linkerd 
+          - target:
+              version: v1
+              kind: ServiceMonitor
+              name: prometheus-kube-prometheus-kubelet
+            patch:
+              - op: replace
+                path: /spec/endpoints
+                value: 
+                  - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+                    interval: 10s
+                    port: https-metrics
+                    scheme: https
+                    tlsConfig:
+                      insecureSkipVerify: true
+                  - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+                    honorLabels: true
+                    interval: 10s
+                    path: /metrics/cadvisor
+                    port: https-metrics
+                    scheme: https
+                    tlsConfig:
+                      insecureSkipVerify: true     
   install:
     remediation:
       retries: 3
