@@ -11,9 +11,4 @@ spec:
       name: letsencrypt
     solvers:
     - http01:
-        ingress:
-          class: harbor-nginx
-          podTemplate:
-            spec:
-              nodeSelector:
-                "kubernetes.io/os": linux    
+        ingress: {}   
