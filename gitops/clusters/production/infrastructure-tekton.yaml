@@ -7,6 +7,7 @@ spec:
   interval: 10m0s
   dependsOn:
     - name: infrastructure-rook  
+    - name: infrastructure-nginx     
   sourceRef:
     kind: GitRepository
     name: flux-system
