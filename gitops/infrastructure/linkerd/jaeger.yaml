@@ -8,17 +8,21 @@ spec:
   releaseName: linkerd-jaeger 
   chart:
     spec:
-      chart: linkerd-jaeger 
+      chart: linkerd-jaeger
+      version: '2.10.0'        
       sourceRef:
         kind: HelmRepository
         name: linkerd
         namespace: flux-system
   interval: 1h0m0s
+  dependsOn:
+    - name: linkerd   
   install:
     remediation:
       retries: 3    
   values:
-    installNamespace: false
+    jaeger:
+      enabled: false
     collector:
       config: |
         receivers:
@@ -48,6 +52,4 @@ spec:
             traces:
               receivers: [otlp,opencensus,zipkin,jaeger]
               processors: [batch]
-              exporters: [jaeger]
-    jaeger:
-      enabled: false    
+              exporters: [jaeger] 
