@@ -9,17 +9,18 @@ spec:
   chart:
     spec:
       chart: linkerd-viz
+      version: '2.10.0'       
       sourceRef:
         kind: HelmRepository
         name: linkerd
         namespace: flux-system
   interval: 1h0m0s
+  dependsOn:
+    - name: linkerd    
   install:
     remediation:
       retries: 3 
   values:
-    installNamespace: false
-    namespace: linkerd
     jaegerUrl: jaeger-query.tracing.svc.local
     grafanaUrl: prometheus-grafana.monitoring.svc.local
     prometheusUrl: prometheus-kube-prometheus-prometheus.monitoring.svc.local:9090
