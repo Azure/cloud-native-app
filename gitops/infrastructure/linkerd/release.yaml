@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: linkerd2 
-      version: '2.9.4'
+      version: '2.10.0'
       sourceRef:
         kind: HelmRepository
         name: linkerd
@@ -22,7 +22,7 @@ spec:
     - kind: Secret
       name: certs
       valuesKey: ca.crt
-      targetPath: global.identityTrustAnchorsPEM
+      targetPath: identityTrustAnchorsPEM
     - kind: Secret
       name: certs
       valuesKey: issuer.crt
