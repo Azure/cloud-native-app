@@ -5,6 +5,11 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
+  dependsOn:
+    - name: infrastructure-jaeger
+    - name: infrastructure-prometheus
+    - name: infrastructure-openfaas
+    - name: infrastructure-mysql  
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -19,3 +24,11 @@ spec:
       kind: HelmRelease
       name: linkerd
       namespace: linkerd
+    - apiVersion: helm.toolkit.fluxcd.io/v1beta1
+      kind: HelmRelease
+      name: linkerd-jaeger
+      namespace: linkerd
+    - apiVersion: helm.toolkit.fluxcd.io/v1beta1
+      kind: HelmRelease
+      name: linkerd-viz
+      namespace: linkerd       
