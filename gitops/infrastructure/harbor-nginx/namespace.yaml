@@ -3,4 +3,7 @@ kind: Namespace
 metadata:
   name: harbor-ingress-system
   labels:
-    cert-manager.io/disable-validation: "true"  
+    cert-manager.io/disable-validation: "true"
+  annotations:
+    linkerd.io/inject: enabled
+    config.linkerd.io/trace-collector: collector.linkerd-jaeger:55678 
