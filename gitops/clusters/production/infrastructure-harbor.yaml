@@ -8,6 +8,7 @@ spec:
   dependsOn:
     - name: infrastructure-harbor-nginx
     - name: infrastructure-rook
+    - name: infrastructure-linkerd    
   sourceRef:
     kind: GitRepository
     name: flux-system
