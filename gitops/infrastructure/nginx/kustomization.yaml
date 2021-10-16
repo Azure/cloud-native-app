@@ -4,3 +4,4 @@ namespace: ingress-basic
 resources:
   - namespace.yaml
   - release.yaml
+  - certmanager.yaml
