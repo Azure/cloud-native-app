@@ -1,4 +1,4 @@
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: conexp-pipeline
@@ -120,24 +120,23 @@ spec:
             from:
               - build-docker-image-fn            
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: build-docker-image
 spec:
-  inputs:
-    resources:
+  params:
+    - name: pathToDockerFile
+      description: Path to Dockerfile
+      default: /workspace/source-repo/src/Dockerfile
+    - name: pathToContext
+      description: The build context used by Kaniko
+      default: /workspace/source-repo/src
+  resources:
+    inputs:    
       - name: source-repo
         type: git
-    params:
-      - name: pathToDockerFile
-        description: Path to Dockerfile
-        default: /workspace/source-repo/src/Dockerfile
-      - name: pathToContext
-        description: The build context used by Kaniko
-        default: /workspace/source-repo/src
-  outputs:
-    resources:
+    outputs:
       - name: image-source
         type: image
   steps:
@@ -153,22 +152,22 @@ spec:
         - --destination=$(outputs.resources.image-source.url)
         - --context=$(inputs.params.pathToContext)
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: deploy-using-kubectl
 spec:
-  inputs:
-    resources:
+  params:
+    - name: pathToYamlFile
+      description: The path to the yaml file to deploy within the git source
+    - name: deployment-namespace
+      description: The namespace to deploy to
+  resources:
+    inputs:    
       - name: source-repo
         type: git
       - name: image-source
         type: image
-    params:
-      - name: pathToYamlFile
-        description: The path to the yaml file to deploy within the git source
-      - name: deployment-namespace
-        description: The namespace to deploy to
   steps:
     - name: update-yaml
       image: alpine
