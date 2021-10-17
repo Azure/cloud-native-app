@@ -34,8 +34,6 @@ kubectl -n linkerd create secret generic certs \
 
 cd ../../..
 
-
-
 ```
 
 Set the variables required for the deployment
@@ -51,7 +49,6 @@ sendGridApiKey="<<set the api key>>"
 # FQDN to assign to the app Eg. {uniquename}.{region}.cloudapp.azure.com if assigning through the Configuration blade of a Azure PublicIP
 appHostName="<<FQDN>>"
 
-
 registryUrl=https://$registryHost
 exp=$(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")
 sed -i "s/{cert_expiry}/$exp/g" gitops/clusters/production/infrastructure-linkerd.yaml
@@ -59,7 +56,6 @@ sed -i "s/{registryHost}/$registryHost/g" gitops/clusters/production/infrastruct
 sed -i "s%{registryUrl}%$registryUrl%g" gitops/clusters/production/infrastructure-harbor.yaml
 sed -i "s%{registryUrl}%$registryUrl%g" gitops/clusters/production/infrastructure-seed.yaml
 sed -i "s/{cluster_issuer_email}/$cluster_issuer_email/g" gitops/clusters/production/infrastructure-certmanager.yaml
-
 
 sed -i "s/{cicdWebhookHost}/$appHostName/g" gitops/clusters/production/app-devops.yaml
 sed -i "s/{registryHost}/$registryHost/g" gitops/clusters/production/app-devops.yaml
@@ -88,10 +84,13 @@ Commit the Repo
 - Run the bootstrap
 
 ```bash
+# PAT token to access Github
 export GITHUB_TOKEN=<PAT TOken>
+# Github runner
+export owner="seenu433"
 
 flux bootstrap github \
-  --owner=<OrgName> \
+  --owner="$owner"> \
   --repository=cloud-native-app \
   --path=gitops/clusters/production \
   --personal
@@ -102,3 +101,11 @@ flux bootstrap github \
 Update the DNS labels on the public IPs as they are provisioned
 
 Create a webhook for the Github
+
+```bash
+curl -H "Authorization: token $GITHUB_TOKEN" \
+  -X POST  \
+  -H "Accept: application/vnd.github.v3+json" \
+  https://api.github.com/repos/$owner/cloud-native-app/hooks \
+  -d "{\"config\":{\"url\":\"https://$appHostName/cd\",\"content_type\":\"json\"}}"
+```
