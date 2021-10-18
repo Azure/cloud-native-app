@@ -26,7 +26,7 @@ export cluster_issuer_email="<<EMAIL>>"
 export sendGridApiKey="<<set the api key>>"
 
 
-. ./cloud-native-app/gitops/setup-1.sh
+. ./cloud-native-app/gitops/setup.sh
 
 ```
 
