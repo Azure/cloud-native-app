@@ -25,6 +25,9 @@ spec:
       replicaCount: 2
       service:
         annotations:
+          service.beta.kubernetes.io/azure-dns-label-name: "${appHostDnsLabel}"      
+      service:
+        annotations:
           service.beta.kubernetes.io/azure-dns-label-name: "${registryHostDnsLabel}"      
       nodeSelector:
         beta.kubernetes.io/os: linux
