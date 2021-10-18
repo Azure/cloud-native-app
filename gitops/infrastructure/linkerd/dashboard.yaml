@@ -23,4 +23,4 @@ spec:
   values:
     jaegerUrl: jaeger-query.tracing.svc.local
     grafanaUrl: prometheus-grafana.monitoring.svc.local
-    prometheusUrl: prometheus-kube-prometheus-prometheus.monitoring.svc.local:9090
+    prometheusUrl: localhost:9090
