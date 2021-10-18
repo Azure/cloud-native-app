@@ -55,6 +55,8 @@ kubectl create secret docker-registry regcred \
 cd ../../..
 
 git remote set-url origin "https://$owner:$GITHUB_TOKEN@github.com/$owner/cloud-native-app.git"
+git config user.email "$cluster_issuer_email"
+git config user.name "Auto"
 git add *
 git commit -m  "Auto commit prep files"
 git push -u origin master
