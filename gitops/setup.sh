@@ -62,7 +62,7 @@ git commit -m  "Auto commit prep files"
 git push -u origin main
 
 flux bootstrap github \
-	  --owner="$owner"> \
+	  --owner="$owner" \
 	    --repository=cloud-native-app \
 	      --path=gitops/clusters/production \
 	        --personal
