@@ -29,6 +29,11 @@ export sendGridApiKey="<<set the api key>>"
 . ./cloud-native-app/gitops/setup.sh
 
 ```
+The cluster components will take around 12 minutes to deploy. You can check the status (all should read True) with the below command
+
+```bash
+kubectl get Kustomizations -A
+```
 
 ### Urls for the components
 
@@ -58,8 +63,9 @@ kubectl port-forward deploy/gateway 8080:8080 -n openfaas
 Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
 ```
 
-Invoke the CICD pipeline by making a small edit to the read.me file in Github. Observe the deployment in Tekton Dashboard
+Invoke the CICD pipeline by making a small edit to the read.me file in Github. Observe the deployment in Tekton Dashboard. The app deployment should take around 5 minutes.
 
+Navigate to the appHost in the browser to test the app.
 
 ## Option 2
 
