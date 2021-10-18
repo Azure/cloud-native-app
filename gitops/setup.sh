@@ -59,7 +59,7 @@ git config user.email "$cluster_issuer_email"
 git config user.name "Auto"
 git add *
 git commit -m  "Auto commit prep files"
-git push -u origin master
+git push -u origin main
 
 flux bootstrap github \
 	  --owner="$owner"> \
