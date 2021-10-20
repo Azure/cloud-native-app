@@ -3,5 +3,5 @@ kind: Kustomization
 namespace: conexp-mvp
 resources:
   - namespace.yaml
-  - ../regcred-conexp.yaml
+  - ../regcred-conexp-sealed.yaml
   - ../../../../yml/app-deploy-rolebinding.yaml
