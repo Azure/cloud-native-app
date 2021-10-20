@@ -6,7 +6,7 @@ wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.16.0/ku
 sudo install -m 755 kubeseal /usr/local/bin/kubeseal && rm kubeseal
 
 flux bootstrap github \
-  --owner="$owner"> \
+  --owner="$owner" \
   --repository=cloud-native-app \
   --path=gitops/clusters/bootstrap \
   --personal
