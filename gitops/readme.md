@@ -103,10 +103,6 @@ flux bootstrap github \
   --path=gitops/clusters/bootstrap \
   --personal
   
-kubeseal --fetch-cert \
---controller-name=sealed-secrets-controller \
---controller-namespace=flux-system \
-> pub-sealed-secrets.pem  
 ```
 
 ### Prepare Repo
@@ -130,6 +126,11 @@ kubectl -n linkerd create secret generic certs \
 --from-file=ca.crt --from-file=issuer.crt \
 --from-file=issuer.key -oyaml --dry-run=client \
 > certs.yaml
+
+kubeseal --fetch-cert \
+--controller-name=sealed-secrets-controller \
+--controller-namespace=flux-system \
+> ../../../../pub-sealed-secrets.pem
 
 kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
 < certs.yaml > certs-sealed.yaml
