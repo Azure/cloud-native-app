@@ -98,7 +98,7 @@ export GITHUB_TOKEN=<PAT TOken>
 export owner="<<Github user>>"
 
 flux bootstrap github \
-  --owner="$owner"> \
+  --owner="$owner" \
   --repository=cloud-native-app \
   --path=gitops/clusters/bootstrap \
   --personal
