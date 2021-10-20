@@ -5,16 +5,16 @@ curl -s https://fluxcd.io/install.sh | sudo bash
 wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.16.0/kubeseal-linux-amd64 -O kubeseal
 sudo install -m 755 kubeseal /usr/local/bin/kubeseal && rm kubeseal
 
-kubeseal --fetch-cert \
---controller-name=sealed-secrets-controller \
---controller-namespace=flux-system \
-> pub-sealed-secrets.pem
-
 flux bootstrap github \
   --owner="$owner"> \
   --repository=cloud-native-app \
   --path=gitops/clusters/bootstrap \
   --personal
+  
+kubeseal --fetch-cert \
+--controller-name=sealed-secrets-controller \
+--controller-namespace=flux-system \
+> pub-sealed-secrets.pem
   
 sudo wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
 sudo dpkg -i step-cli_0.15.2_amd64.deb
