@@ -14,12 +14,6 @@ flux bootstrap github \
   --path=gitops/clusters/bootstrap \
   --personal
 
-echo "## Download kube seal publick key"
-kubeseal --fetch-cert \
---controller-name=sealed-secrets-controller \
---controller-namespace=flux-system \
-> pub-sealed-secrets.pem
-  
 echo "## Install Step"
 sudo wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
 sudo dpkg -i step-cli_0.15.2_amd64.deb
@@ -40,6 +34,12 @@ kubectl -n linkerd create secret generic certs \
 	--from-file=ca.crt --from-file=issuer.crt \
 	--from-file=issuer.key -oyaml --dry-run=client \
 	> certs.yaml
+
+echo "## Download kube seal publick key"
+kubeseal --fetch-cert \
+--controller-name=sealed-secrets-controller \
+--controller-namespace=flux-system \
+> ../../../../pub-sealed-secrets.pem
 
 echo "# Seal Certs Secrets"
 kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
