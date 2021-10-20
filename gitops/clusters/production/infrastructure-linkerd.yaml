@@ -16,7 +16,7 @@ spec:
   path: ./gitops/infrastructure/linkerd
   postBuild:
     substitute:
-      cert_expiry: "{cert_expiry}"  
+      cert_expiry: "2022-10-20T19:30:32Z"  
   prune: true
   validation: client
   healthChecks:
