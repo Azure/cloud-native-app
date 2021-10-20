@@ -15,8 +15,8 @@ spec:
   path: ./gitops/infrastructure/harbor
   postBuild:
     substitute:
-      registryHost: "harbor-cna-srpadala-1.eastus.cloudapp.azure.com"
-      externalUrl: "https://harbor-cna-srpadala-1.eastus.cloudapp.azure.com"
+      registryHost: "{registryHost}"
+      externalUrl: "{registryUrl}"
   prune: true
   validation: client
   healthChecks:
