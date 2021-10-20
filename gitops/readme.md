@@ -79,6 +79,38 @@ curl -s https://fluxcd.io/install.sh | sudo bash
 
 #### Generate Linkerd v2 certificates
 
+### Install Kube-Seal
+
+```bash
+wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.16.0/kubeseal-linux-amd64 -O kubeseal
+sudo install -m 755 kubeseal /usr/local/bin/kubeseal && rm kubeseal
+
+kubeseal --fetch-cert \
+--controller-name=sealed-secrets-controller \
+--controller-namespace=flux-system \
+> pub-sealed-secrets.pem
+```
+
+### Bootstrap
+
+- Create a PAT token in Github
+- Run the bootstrap
+
+```bash
+# PAT token to access Github
+export GITHUB_TOKEN=<PAT TOken>
+# Github runner
+export owner="<<Github user>>"
+
+flux bootstrap github \
+  --owner="$owner"> \
+  --repository=cloud-native-app \
+  --path=gitops/clusters/bootstrap \
+  --personal
+```
+
+### Prepare Repo
+
 ```bash
 
 wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
@@ -98,6 +130,10 @@ kubectl -n linkerd create secret generic certs \
 --from-file=ca.crt --from-file=issuer.crt \
 --from-file=issuer.key -oyaml --dry-run=client \
 > certs.yaml
+
+kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+< certs.yaml > certs-sealed.yaml
+rm certs.yaml
 
 cd ../../..
 
@@ -140,9 +176,17 @@ kubectl create secret docker-registry regcred \
 --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp -oyaml --dry-run=client \
 > regcred-conexp.yaml
 
+kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+< regcred-conexp.yaml > regcred-conexp-sealed.yaml
+rm regcred-conexp.yaml
+
 kubectl create secret docker-registry regcred \
 --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn -oyaml --dry-run=client \
 > regcred-openfaas.yaml
+
+kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+< regcred-openfaas.yaml > regcred-openfaas-sealed.yaml
+rm regcred-openfaas.yaml
 
 cd ../../..
 
@@ -150,22 +194,17 @@ cd ../../..
 
 Commit the Repo
 
-### Bootstrap
-
-- Create a PAT token in Github
-- Run the bootstrap
+### Deploy the app
 
 ```bash
-# PAT token to access Github
-export GITHUB_TOKEN=<PAT TOken>
-# Github runner
-export owner="<<Github user>>"
 
-flux bootstrap github \
-  --owner="$owner"> \
-  --repository=cloud-native-app \
-  --path=gitops/clusters/production \
-  --personal
+  flux create kustomization cloud-native-app \
+    --depends-on=flux-system \
+    --source=seenu433/cloud-native-app \
+    --path="gitops/clusters/production" \
+    --prune=true \
+    --interval=5m
+    
 ```
 
 ### Reconciliation
