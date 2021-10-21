@@ -22,9 +22,3 @@ spec:
       retries: 3 
   values:
     jaegerUrl: jaeger-query.tracing.svc.cluster.local:80
-    grafanaUrl: prometheus-grafana.monitoring.svc.cluster.local:80
-    prometheusUrl: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
-    prometheus:
-      enabled: false
-    grafana:
-      enabled: false
