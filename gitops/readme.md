@@ -201,7 +201,7 @@ Commit the Repo
 
   flux create kustomization cloud-native-app \
     --depends-on=flux-system \
-    --source=seenu433/cloud-native-app \
+    --source=flux-system \
     --path="gitops/clusters/production" \
     --prune=true \
     --interval=5m
