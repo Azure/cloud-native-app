@@ -6,6 +6,6 @@ metadata:
     linkerd.io/inject: enabled
     config.linkerd.io/opaque-ports: "4222"
     config.linkerd.io/trace-collector: collector.linkerd-jaeger:55678
-    config.alpha.linkerd.io/trace-collector-service-account: linkerd-collector
+    config.alpha.linkerd.io/trace-collector-service-account: collector
   labels:
     role: openfaas-fn
