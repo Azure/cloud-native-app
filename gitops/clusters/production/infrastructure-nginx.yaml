@@ -15,7 +15,7 @@ spec:
   validation: client
   postBuild:
     substitute:
-      appHostDnsLabel : "{appHostDnsLabel}" 
+      appHostDnsLabel : "app-cna-srpadala" 
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v1beta1
       kind: HelmRelease
