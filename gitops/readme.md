@@ -227,4 +227,4 @@ curl -H "Authorization: token $GITHUB_TOKEN" \
   -d "{\"config\":{\"url\":\"https://$appHostName/cd\",\"content_type\":\"json\"}}"
 ```
 
-Test Stub #1
+Test Stub #2
