@@ -15,7 +15,7 @@ spec:
   validation: client
   postBuild:
     substitute:
-      registryHostDnsLabel : "harbor-cna-srpadala"   
+      registryHostDnsLabel : "{registryHostDnsLabel}"   
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v1beta1
       kind: HelmRelease
