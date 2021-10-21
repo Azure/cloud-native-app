@@ -21,4 +21,4 @@ spec:
     remediation:
       retries: 3 
   values:
-    jaegerUrl: jaeger-query.tracing.svc.cluster.local:80
+    jaegerUrl: jaeger-query.tracing:16687
