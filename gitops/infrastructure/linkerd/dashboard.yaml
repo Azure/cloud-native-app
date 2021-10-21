@@ -21,6 +21,6 @@ spec:
     remediation:
       retries: 3 
   values:
-    jaegerUrl: http://jaeger-query.tracing.svc.cluster.local
-    grafanaUrl: http://prometheus-grafana.monitoring.svc.cluster.local
+    jaegerUrl: jaeger-query.tracing.svc.cluster.local:80
+    grafanaUrl: prometheus-grafana.monitoring.svc.cluster.local:80
     prometheusUrl: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
