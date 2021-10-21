@@ -104,7 +104,7 @@ git push -u origin main
 echo "## Add Kustomization to reconcile the app"
 flux create kustomization cloud-native-app \
   --depends-on=flux-system \
-  --source=seenu433/cloud-native-app \
+  --source=flux-system \
   --path="gitops/clusters/production" \
   --prune=true \
   --interval=5m
