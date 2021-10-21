@@ -61,6 +61,13 @@ Browse to http://localhost:9090
 # Openfaas
 kubectl port-forward deploy/gateway 8080:8080 -n openfaas
 Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
+
+# Harbor Url
+echo $registryHost
+
+# App Url
+echo $appHostName
+
 ```
 
 Invoke the CICD pipeline by making a small edit to the read.me file in Github. Observe the deployment in Tekton Dashboard. The app deployment should take around 5 minutes.
