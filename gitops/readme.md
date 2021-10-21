@@ -219,3 +219,5 @@ curl -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$owner/cloud-native-app/hooks \
   -d "{\"config\":{\"url\":\"https://$appHostName/cd\",\"content_type\":\"json\"}}"
 ```
+
+Test Stub #1
