@@ -127,7 +127,7 @@ kubectl -n linkerd create secret generic certs \
 --from-file=issuer.key -oyaml --dry-run=client \
 > certs.yaml
 
-kubeseal --fetch-cert \
+sleep 1m; kubeseal --fetch-cert \
 --controller-name=sealed-secrets-controller \
 --controller-namespace=flux-system \
 > ../../../../pub-sealed-secrets.pem
