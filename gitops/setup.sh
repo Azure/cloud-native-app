@@ -36,7 +36,7 @@ kubectl -n linkerd create secret generic certs \
 	> certs.yaml
 
 echo "## Download kube seal publick key"
-kubeseal --fetch-cert \
+sleep 1m; kubeseal --fetch-cert \
 --controller-name=sealed-secrets-controller \
 --controller-namespace=flux-system \
 > ../../../../pub-sealed-secrets.pem
