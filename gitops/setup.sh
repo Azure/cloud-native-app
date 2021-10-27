@@ -61,6 +61,7 @@ exp=$(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")
 echo "## Generate secret for variable substitution"
 sudo sh -c "kubectl create secret generic gitops-variables --from-literal=registryHost=$registryHost \
 	--from-literal=registryUrl=$registryUrl \
+	--from-literal=externalUrl=$registryUrl \
 	--from-literal=cluster_issuer_email=$cluster_issuer_email  \
 	--from-literal=cicdWebhookHost=$appHostName \
 	--from-literal=appHostName=$appHostName \
