@@ -14,6 +14,8 @@ flux bootstrap github \
   --path=gitops/clusters/bootstrap \
   --personal
 
+kubectl rollout status deployment sealed-secrets-controller
+
 echo "## Install Step"
 sudo wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
 sudo dpkg -i step-cli_0.15.2_amd64.deb
