@@ -12,8 +12,9 @@ spec:
     name: flux-system
   path: ./gitops/infrastructure/cert-manager
   postBuild:
-    substitute:
-      cluster_issuer_email: "{cluster_issuer_email}"  
+    substituteFrom:
+      - kind: Secret
+        name: gitops-variables
   prune: true
   validation: client
   healthChecks:
