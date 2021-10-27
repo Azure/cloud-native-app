@@ -13,7 +13,8 @@ spec:
     name: flux-system
   path: ./gitops/infrastructure/seed
   postBuild:
-    substitute:
-      externalUrl: "{registryUrl}"
+    substituteFrom:
+      - kind: Secret
+        name: gitops-variables
   prune: true
   validation: client
