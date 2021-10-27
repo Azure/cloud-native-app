@@ -57,7 +57,6 @@ registryHostDnsLabel=`echo $registryHost | cut -d '.' -f 1`
 
 echo "## Replace tokens in yamls"
 exp=$(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")
-sudo sed -i "s/{cert_expiry}/$exp/g" gitops/clusters/production/infrastructure-linkerd.yaml
 
 echo "## Generate secret for variable substitution"
 sudo sh -c "kubectl create secret generic gitops-variables --from-literal=registryHost=$registryHost \
@@ -68,6 +67,7 @@ sudo sh -c "kubectl create secret generic gitops-variables --from-literal=regist
 	--from-literal=sendGridApiKey=$sendGridApiKey \
 	--from-literal=registryHostDnsLabel=$registryHostDnsLabel \
 	--from-literal=appHostDnsLabel=$appHostDnsLabel \
+	--from-literal=cert_expiry=$exp \
 	-n flux-system -oyaml --dry-run=client \
 	> gitops-variables.yaml"
 
