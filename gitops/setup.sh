@@ -14,8 +14,6 @@ flux bootstrap github \
   --path=gitops/clusters/bootstrap \
   --personal
 
-kubectl rollout status deployment sealed-secrets-controller
-
 echo "## Install Step"
 sudo wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
 sudo dpkg -i step-cli_0.15.2_amd64.deb
@@ -37,8 +35,11 @@ sudo sh -c "kubectl -n linkerd create secret generic certs \
 	--from-file=issuer.key -oyaml --dry-run=client \
 	> certs.yaml"
 
+echo "## Checking kube seal roolout status"
+kubectl rollout status deployment sealed-secrets-controller -n flux-system
+
 echo "## Download kube seal publick key"
-sudo sh -c "sleep 1m; kubeseal --fetch-cert \
+sudo sh -c "kubeseal --fetch-cert \
 --controller-name=sealed-secrets-controller \
 --controller-namespace=flux-system \
 > ../../../../pub-sealed-secrets.pem"
@@ -62,7 +63,7 @@ echo "## Generate secret for variable substitution"
 sudo sh -c "kubectl create secret generic gitops-variables --from-literal=registryHost=$registryHost \
 	--from-literal=registryUrl=$registryUrl \
 	--from-literal=cluster_issuer_email=$cluster_issuer_email  \
-	--from-literal=cicdWebhookHost=$cicdWebhookHost \
+	--from-literal=cicdWebhookHost=$appHostName \
 	--from-literal=appHostName=$appHostName \
 	--from-literal=sendGridApiKey=$sendGridApiKey \
 	--from-literal=registryHostDnsLabel=$registryHostDnsLabel \
