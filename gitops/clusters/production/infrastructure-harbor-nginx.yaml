@@ -14,8 +14,9 @@ spec:
   prune: true
   validation: client
   postBuild:
-    substitute:
-      registryHostDnsLabel : "{registryHostDnsLabel}"   
+    substituteFrom:
+      - kind: Secret
+        name: gitops-variables
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v1beta1
       kind: HelmRelease
