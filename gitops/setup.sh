@@ -55,18 +55,28 @@ registryHostDnsLabel=`echo $registryHost | cut -d '.' -f 1`
 echo "## Replace tokens in yamls"
 exp=$(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")
 sudo sed -i "s/{cert_expiry}/$exp/g" gitops/clusters/production/infrastructure-linkerd.yaml
-sudo sed -i "s/{registryHost}/$registryHost/g" gitops/clusters/production/infrastructure-harbor.yaml
-sudo sed -i "s%{registryUrl}%$registryUrl%g" gitops/clusters/production/infrastructure-harbor.yaml
-sudo sed -i "s%{registryUrl}%$registryUrl%g" gitops/clusters/production/infrastructure-seed.yaml
-sudo sed -i "s/{cluster_issuer_email}/$cluster_issuer_email/g" gitops/clusters/production/infrastructure-certmanager.yaml
 
-sudo sed -i "s/{cicdWebhookHost}/$appHostName/g" gitops/clusters/production/app-devops.yaml
-sudo sed -i "s/{registryHost}/$registryHost/g" gitops/clusters/production/app-devops.yaml
-sudo sed -i "s/{appHostName}/$appHostName/g" gitops/clusters/production/app-devops.yaml
-sudo sed -i "s/{sendGridApiKey}/$sendGridApiKey/g" gitops/clusters/production/app-devops.yaml
+echo "## Generate secret for variable substitution"
+sudo sh -c "kubectl create secret generic gitops-variables --from-literal=registryHost=$registryHost \
+	--from-literal=registryUrl=$registryUrl \
+	--from-literal=cluster_issuer_email=$cluster_issuer_email  \
+	--from-literal=cicdWebhookHost=$cicdWebhookHost \
+	--from-literal=appHostName=$appHostName \
+	--from-literal=sendGridApiKey=$sendGridApiKey \
+	--from-literal=registryHostDnsLabel=$registryHostDnsLabel \
+	--from-literal=appHostDnsLabel=$appHostDnsLabel \
+	-n flux-system -oyaml --dry-run=client \
+	> gitops-variables.yaml"
 
-sudo sed -i "s/{registryHostDnsLabel}/$registryHostDnsLabel/g" gitops/clusters/production/infrastructure-harbor-nginx.yaml
-sudo sed -i "s/{appHostDnsLabel}/$appHostDnsLabel/g" gitops/clusters/production/infrastructure-nginx.yaml
+echo "## Seal secret for variable substitution"
+sudo sh -c "kubeseal --format=yaml --cert=../pub-sealed-secrets.pem \
+< gitops-variables.yaml > gitops-variables-sealed.yaml"
+sudo rm gitops-variables.yaml	
+
+echo "## Apply secret for variable substitution"
+kubectl apply -f gitops-variables-sealed.yaml
+
+sudo rm gitops-variables-sealed.yaml
 
 cd gitops/app/core
 
