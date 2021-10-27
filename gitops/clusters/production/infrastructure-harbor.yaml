@@ -14,9 +14,9 @@ spec:
     name: flux-system
   path: ./gitops/infrastructure/harbor
   postBuild:
-    substitute:
-      registryHost: "{registryHost}"
-      externalUrl: "{registryUrl}"
+    substituteFrom:
+      - kind: Secret
+        name: gitops-variables
   prune: true
   validation: client
   healthChecks:
