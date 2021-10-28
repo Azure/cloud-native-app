@@ -2,7 +2,7 @@
 
 ## Prepare
 
-- Create a Kubernetes cluster with a minimum of 3 nodes and ~8+GB per node (e.g., Standard_DS3_v2). Ensure the cluster is reachable by running any kubectl command.
+- Create a Kubernetes cluster with a minimum of 3 nodes and ~8+GB per node (e.g., Standard_DS3_v2). Do not deploy any network policy plugin. Ensure the cluster is reachable by running any kubectl command.
 - Fork the repo
 - Create a [PAT token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the repo (check the repo box as scope)
 - Clone the fork to workstation
