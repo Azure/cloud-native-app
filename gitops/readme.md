@@ -134,7 +134,9 @@ kubectl -n linkerd create secret generic certs \
 --from-file=issuer.key -oyaml --dry-run=client \
 > certs.yaml
 
-sleep 1m; kubeseal --fetch-cert \
+kubectl rollout status deployment sealed-secrets-controller -n flux-system
+
+kubeseal --fetch-cert \
 --controller-name=sealed-secrets-controller \
 --controller-namespace=flux-system \
 > ../../../../pub-sealed-secrets.pem
@@ -164,19 +166,28 @@ registryUrl=https://$registryHost
 appHostDnsLabel=`echo $appHostName | cut -d '.' -f 1`
 registryHostDnsLabel=`echo $registryHost | cut -d '.' -f 1`
 exp=$(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")
-sed -i "s/{cert_expiry}/$exp/g" gitops/clusters/production/infrastructure-linkerd.yaml
-sed -i "s/{registryHost}/$registryHost/g" gitops/clusters/production/infrastructure-harbor.yaml
-sed -i "s%{registryUrl}%$registryUrl%g" gitops/clusters/production/infrastructure-harbor.yaml
-sed -i "s%{registryUrl}%$registryUrl%g" gitops/clusters/production/infrastructure-seed.yaml
-sed -i "s/{cluster_issuer_email}/$cluster_issuer_email/g" gitops/clusters/production/infrastructure-certmanager.yaml
 
-sed -i "s/{cicdWebhookHost}/$appHostName/g" gitops/clusters/production/app-devops.yaml
-sed -i "s/{registryHost}/$registryHost/g" gitops/clusters/production/app-devops.yaml
-sed -i "s/{appHostName}/$appHostName/g" gitops/clusters/production/app-devops.yaml
-sed -i "s/{sendGridApiKey}/$sendGridApiKey/g" gitops/clusters/production/app-devops.yaml
+kubectl create secret generic gitops-variables --from-literal=registryHost=$registryHost \
+	--from-literal=registryUrl=$registryUrl \
+	--from-literal=externalUrl=$registryUrl \
+	--from-literal=cluster_issuer_email=$cluster_issuer_email  \
+	--from-literal=cicdWebhookHost=$appHostName \
+	--from-literal=appHostName=$appHostName \
+	--from-literal=sendGridApiKey=$sendGridApiKey \
+	--from-literal=registryHostDnsLabel=$registryHostDnsLabel \
+	--from-literal=appHostDnsLabel=$appHostDnsLabel \
+	--from-literal=cert_expiry=$exp \
+	-n flux-system -oyaml --dry-run=client \
+	> gitops-variables.yaml
+  
+kubeseal --format=yaml --cert=../pub-sealed-secrets.pem \
+< gitops-variables.yaml > gitops-variables-sealed.yaml  
 
-sed -i "s/{registryHostDnsLabel}/$registryHostDnsLabel/g" gitops/clusters/production/infrastructure-harbor-nginx.yaml
-sed -i "s/{appHostDnsLabel}/$appHostDnsLabel/g" gitops/clusters/production/infrastructure-nginx.yaml
+rm gitops-variables.yaml
+
+kubectl apply -f gitops-variables-sealed.yaml
+
+rm gitops-variables-sealed.yaml
 
 cd gitops/app/core
 
