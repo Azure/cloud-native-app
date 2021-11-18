@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: harbor-seed
+  namespace: harbor-system
+spec:
+  parallelism: 1    
+  completions: 1    
+  template:         
+    metadata:
+      name: harbor-seed
+    spec:
+      volumes:
+      - name: harbor-seed-scripts-volume
+        configMap:
+          name: harbor-seed-scripts
+      containers:
+      - name: harbor-seed-job
+        image: ubuntu:18.04
+        volumeMounts:
+          - mountPath: /harbor-seed-scripts
+            name: harbor-seed-scripts-volume
+        env:
+          - name: HOME
+            value: /tmp
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "scripts in /harbor-seed-scripts"
+          ls -lh /harbor-seed-scripts
+          echo "copy scripts to /tmp"
+          cp /harbor-seed-scripts/*.json /tmp
+          cp /harbor-seed-scripts/*.sh /tmp
+          echo "apply 'chmod +x' to /tmp/*.sh"
+          chmod +x /tmp/*.sh
+          echo "execute harbor-seed.sh now"
+          /tmp/harbor-seed.sh
+      restartPolicy: Never
+---
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    harbor-seed.sh: |
+      echo "script-one.sh"
+      apt update && apt -y install curl && apt -y install jq
+      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects" -d "@/tmp/harbor-project.json" -H "Content-Type: application/json"
+      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/users" -d "@/tmp/harbor-project-user.json" -H "Content-Type: application/json"
+      conexpid=$(curl -u admin:admin -k -s -X GET "${externalUrl}/api/v2.0/projects?name=conexp" | jq '.[0].project_id')
+      echo "project_id: $conexpid"
+      curl -u admin:admin -i -k -X POST "${externalUrl}/api/v2.0/projects/$conexpid/members" -d "@/tmp/harbor-project-member.json" -H "Content-Type: application/json"
+    harbor-project.json: |
+      {
+        "metadata": {
+          "public": "false"
+        },
+        "project_name": "conexp",
+        "owner_id": 1,
+        "owner_name": "admin"
+      }    
+    harbor-project-user.json: |
+      {
+          "username": "conexp",
+          "email": "conexp@host.local",
+          "realname": "conexp",
+          "password": "FTA@CNCF0n@zure3"
+      }      
+    harbor-project-member.json: |
+      {"role_id":2,"member_user":{"username":"conexp"}}
+  kind: ConfigMap
+  metadata:
+    name:  harbor-seed-scripts
+    namespace: harbor-system
+kind: List
+metadata: {}

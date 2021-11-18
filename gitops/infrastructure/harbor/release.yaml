@@ -1,0 +1,72 @@
+
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: harbor
+  namespace: harbor-system
+spec:
+  releaseName: harbor
+  chart:
+    spec:
+      chart: harbor
+      version: '1.6.0'
+      sourceRef:
+        kind: HelmRepository
+        name: harbor
+        namespace: flux-system
+  interval: 1h0m0s
+  install:
+    remediation:
+      retries: 3
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - kind: StatefulSet
+            apiVersion: apps/v1
+            metadata:
+              name: harbor-harbor-database
+            spec:
+              template:
+                spec:
+                  initContainers:
+                  - args:
+                    - -c
+                    - '[ -e /var/lib/postgresql/data/postgresql.conf ] && [ ! -d /var/lib/postgresql/data/pgdata] && mkdir -m 0700 /var/lib/postgresql/data/pgdata && mv /var/lib/postgresql/data/* /var/lib/postgresql/data/pgdata/ || [ -d /var/lib/postgresql/data/pgdata ] && chown -R postgres:postgres /var/lib/postgresql/data/pgdata && chmod 0700 -R /var/lib/postgresql/data/pgdata || true'
+                    name: data-migrator
+          - kind: Ingress
+            apiVersion: networking.k8s.io/v1
+            metadata:
+              name: harbor-harbor-ingress
+              annotations:
+                acme.cert-manager.io/http01-edit-in-place: "true"                    
+  values:
+    expose:
+      tls:
+        certSource: secret
+        secret:
+          secretName: ingress-cert-harbor
+      ingress:
+        annotations:
+          kubernetes.io/ingress.class: harbor-nginx 
+          cert-manager.io/cluster-issuer: letsencrypt
+        hosts:
+          core: "${registryHost}"
+    notary:
+      enabled: false
+    trivy:
+       enabled: false
+    persistence:
+      enabled: true
+      persistentVolumeClaim:
+        chartmuseum:
+          storageClass: rook-ceph-block
+        jobservice:
+          storageClass: rook-ceph-block
+        database:
+          storageClass: rook-ceph-block
+        redis:
+          storageClass: rook-ceph-block
+        registry:
+          storageClass: rook-ceph-block
+    externalURL: "${externalUrl}"
+    harborAdminPassword: admin
