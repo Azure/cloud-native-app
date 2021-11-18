@@ -1,0 +1,42 @@
+
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nginx-ingress
+  namespace: ingress-basic
+spec:
+  releaseName: nginx-ingress
+  chart:
+    spec:
+      chart: ingress-nginx
+      version: '3.23.0'
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx
+        namespace: flux-system
+  interval: 1h0m0s
+  install:
+    remediation:
+      retries: 3
+  # Default values
+  # https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/values.yaml
+  values:
+    controller:
+      replicaCount: 2
+      service:
+        annotations:
+          service.beta.kubernetes.io/azure-dns-label-name: "${appHostDnsLabel}" 
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+    defaultBackend:
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - kind: Deployment
+            apiVersion: apps/v1
+            metadata:
+              name: nginx-ingress-ingress-nginx-controller 
+              annotations:
+                linkerd.io/inject: enabled      
