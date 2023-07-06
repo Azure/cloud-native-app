@@ -10,7 +10,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: sealed-secrets
-      version: ">=1.15.0-0"
+      version: ">=2.10.0-0"
   interval: 1h0m0s
   releaseName: sealed-secrets-controller
   targetNamespace: flux-system

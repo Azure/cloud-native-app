@@ -85,7 +85,7 @@ Create the ClusterIssuer by applying the below YAML with the email address chang
 
 ```
 cat <<EOF | kubectl create -f -
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt

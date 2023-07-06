@@ -4,7 +4,7 @@ echo "## Installing Flux"
 curl -s https://fluxcd.io/install.sh | sudo bash
 
 echo "## Installing Kube Seal"
-sudo wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.16.0/kubeseal-linux-amd64 -O kubeseal
+sudo wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.22.0/kubeseal-0.22.0-linux-amd64.tar.gz -O kubeseal
 sudo install -m 755 kubeseal /usr/local/bin/kubeseal && rm kubeseal
 
 echo "##Flux Bootstap with kubeseal"
