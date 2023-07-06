@@ -6,7 +6,7 @@ metadata:
 spec:
   interval: 10m0s
   dependsOn:
-    - name: infrastructure-rook  
+    - name: infrastructure-rook-cluster  
     - name: infrastructure-nginx     
   sourceRef:
     kind: GitRepository
