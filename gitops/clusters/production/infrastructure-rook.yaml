@@ -20,16 +20,4 @@ spec:
     - apiVersion: helm.toolkit.fluxcd.io/v1beta1
       kind: HelmRelease
       name: rook-ceph
-      namespace: rook-ceph 
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: rook-ceph-osd-0
-      namespace: rook-ceph
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: rook-ceph-osd-1
-      namespace: rook-ceph
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: rook-ceph-osd-2
       namespace: rook-ceph
