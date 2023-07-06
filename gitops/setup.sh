@@ -4,7 +4,8 @@ echo "## Installing Flux"
 curl -s https://fluxcd.io/install.sh | sudo bash
 
 echo "## Installing Kube Seal"
-sudo wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.22.0/kubeseal-0.22.0-linux-amd64.tar.gz -O kubeseal
+sudo wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.22.0/kubeseal-0.22.0-linux-amd64.tar.gz -O kubeseal.tar.gz
+tar -xvzf kubeseal.tar.gz kubeseal && rm kubeseal.tar.gz
 sudo install -m 755 kubeseal /usr/local/bin/kubeseal && rm kubeseal
 
 echo "##Flux Bootstap with kubeseal"
@@ -15,8 +16,8 @@ flux bootstrap github \
   --personal
 
 echo "## Install Step"
-sudo wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
-sudo dpkg -i step-cli_0.15.2_amd64.deb
+sudo wget https://github.com/smallstep/cli/releases/download/v0.23.4/step-cli_0.23.4_amd64.deb
+sudo dpkg -i step-cli_0.23.4_amd64.deb
 
 cd cloud-native-app/gitops/infrastructure/linkerd
 
