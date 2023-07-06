@@ -1,0 +1,16 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: regcred
+  namespace: openfaas-fn
+spec:
+  encryptedData:
+    .dockerconfigjson: AgCgUgqV68DLV12kiBC8bV7F8u6w0RUhQwOGHZjGaMKG6wx6tqRjDOSfcmA5vKhJta+kWURXCa5wWwFWEvkPvT931uPjC7mvtXCj+w98HkrWSMrY2eNZP0/5a1qn2BmeohwB6hqmpAHTKTinU8QHUxzw44QELHRJUv6vzLBi1hMho/F0WyWfnTlp2RpngCkjIGF3XaHxp47INlV5oZJBWF43Wj49Xb21jYbStYERr5IuT10uymEdy8B/RpI6BnCdmablBDNzcSNkTUIg/EUw4IL5M2F5EebqvT6WU8xtvl4ynTmghRt4aEzqZbXHF6Broc7RchDknnqM3SP1f3ly+9VpYhdK7kC8ip+7E4MPEMqy2tQXyNrQM/uQO49FmkSfi92sPDB+J/Rrj8h2w8c7dIB90TGP3N8GxGbIY3ee7cBR/aMHFRYRpdLA1gLoyR3/xxx1gU5TdWrZEuKsXiz/4ZIuzyBGvJdfTJL8YvfBbumwK67HR+YrGqNS7Je7cyXbsV5+rCr0VQltlWmjyGHVyBkZ7EoHKAm+SG9GOLEjev+TN4lQQdcmTSseHPr9xgFhED6+c0fweduxy64y+LRyi8s4w16NS7Tst3QAqhgVd/RFdsAJcpzJMZNJWO29/te4EHwwvw2Z4x6X8iSohqGU+B9tF2dr/Jk9eFaOeIhTpVYt01PJffpFywQW/jgg9xLSU3zLEQ3Wtay+iUWwll9VHvkWBDGTzzHogJ5jM6WHbBlcx9l8CmkDMgV+ZDEVnq6sCCz/lGy29q/Z4IIimElEf9HdeQuTShC0fIGU8tErbCn6R0nVq97dPpfKRYHAEvjo/p/ZEaC2Poii1hoIYXK7kUntYwCuFuyV0h1Tv/brIvQUYLkgZsTBxEKE0agFgVkqdOeCPDLGNC8vZJIxqJ/DbnWwgSMRDoKVb7odUt1JWWg=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: regcred
+      namespace: openfaas-fn
+    type: kubernetes.io/dockerconfigjson
+
