@@ -17,4 +17,3 @@ spec:
       - kind: Secret
         name: gitops-variables  
   prune: true
-  validation: client

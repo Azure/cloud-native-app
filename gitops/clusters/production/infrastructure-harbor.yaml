@@ -18,7 +18,6 @@ spec:
       - kind: Secret
         name: gitops-variables
   prune: true
-  validation: client
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v1beta1
       kind: HelmRelease

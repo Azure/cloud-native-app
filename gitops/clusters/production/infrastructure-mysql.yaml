@@ -13,7 +13,6 @@ spec:
     name: flux-system
   path: ./gitops/infrastructure/mysql
   prune: true
-  validation: client
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v1beta1
       kind: HelmRelease

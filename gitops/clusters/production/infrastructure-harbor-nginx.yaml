@@ -12,7 +12,6 @@ spec:
     name: flux-system
   path: ./gitops/infrastructure/harbor-nginx
   prune: true
-  validation: client
   postBuild:
     substituteFrom:
       - kind: Secret

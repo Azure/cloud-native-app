@@ -12,7 +12,6 @@ spec:
     name: flux-system
   path: ./gitops/infrastructure/flux-ui
   prune: true
-  validation: client
   postBuild:
     substituteFrom:
       - kind: Secret
