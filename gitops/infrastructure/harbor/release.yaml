@@ -26,6 +26,7 @@ spec:
           secretName: ingress-cert-harbor
       ingress:
         annotations:
+          kubernetes.io/ingress.class: harbor-nginx
           ingress.kubernetes.io/ssl-redirect: "true"
           ingress.kubernetes.io/proxy-body-size: "0"
           nginx.ingress.kubernetes.io/ssl-redirect: "true"
