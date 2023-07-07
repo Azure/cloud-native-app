@@ -44,7 +44,7 @@ spec:
           value: ','
         - name: asynchronous_invocation
           value: "false"
-        image: openfaas/nats-connector:0.2.2
+        image: ghcr.io/openfaas/nats-connector:0.3.0
         imagePullPolicy: IfNotPresent
         name: nats-connector
         resources: {}
