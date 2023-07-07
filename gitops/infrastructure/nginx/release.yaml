@@ -30,13 +30,4 @@ spec:
         beta.kubernetes.io/os: linux
     defaultBackend:
       nodeSelector:
-        beta.kubernetes.io/os: linux
-  postRenderers:
-    - kustomize:
-        patchesStrategicMerge:
-          - kind: Deployment
-            apiVersion: apps/v1
-            metadata:
-              name: nginx-ingress-ingress-nginx-controller 
-              annotations:
-                linkerd.io/inject: enabled      
+        beta.kubernetes.io/os: linux     
