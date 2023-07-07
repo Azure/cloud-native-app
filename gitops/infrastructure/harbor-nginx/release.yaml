@@ -24,6 +24,8 @@ spec:
     controller:
       ingressClassResource: 
         name: harbor-nginx
+        controllerValue: k8s.io/harbor-nginx
+      ingressClass: harbor-nginx
       replicaCount: 2
       service:
         annotations:
