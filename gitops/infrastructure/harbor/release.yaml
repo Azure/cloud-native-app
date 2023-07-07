@@ -29,6 +29,7 @@ spec:
           kubernetes.io/ingress.class: harbor-nginx 
           cert-manager.io/cluster-issuer: letsencrypt
           acme.cert-manager.io/http01-edit-in-place: "true" 
+        ingressClassName: harbor-nginx
         hosts:
           core: "${registryHost}"
     notary:
