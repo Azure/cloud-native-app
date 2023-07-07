@@ -38,34 +38,26 @@ spec:
           - name: deployment-namespace
             value: $(tt.params.deployment-namespace)
           - name: fn-deployment-namespace
-            value: $(tt.params.fn-deployment-namespace)            
-        resources:
-          - name: source-repo
-            resourceSpec:
-              type: git
-              params:
-              - name: revision
-                value: $(tt.params.gitrevision)
-              - name: url
-                value: $(tt.params.gitrepositoryurl)
+            value: $(tt.params.fn-deployment-namespace)           
+          - name: git-revision
+            value: $(tt.params.gitrevision)
+          - name: git-url
+            value: $(tt.params.gitrepositoryurl)  
           - name: web-image-source
-            resourceSpec:
-              type: image
-              params:
-                - name: url
-                  value: $(tt.params.web-imageUrl)
+            value: $(tt.params.web-imageUrl)      
           - name: api-image-source
-            resourceSpec:
-              type: image
-              params:
-                - name: url
-                  value: $(tt.params.api-imageUrl)
+            value: $(tt.params.api-imageUrl) 
           - name: fn-image-source
-            resourceSpec:
-              type: image
-              params:
-                - name: url
-                  value: $(tt.params.fn-imageUrl)                  
+            value: $(tt.params.fn-imageUrl)                                
+        workspaces:
+        - name: shared-data
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+              - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi                                        
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
