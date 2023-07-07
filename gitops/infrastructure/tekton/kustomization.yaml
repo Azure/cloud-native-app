@@ -7,5 +7,4 @@ resources:
   - https://storage.googleapis.com/tekton-releases/dashboard/previous/v0.37.0/release.yaml
 patchesStrategicMerge:
   - ../../../yml/tekton-default-configmap.yaml
-  - ../../../yml/tekton-pvc-configmap.yaml
   - ../../../yml/tekton-feature-flags-configmap.yaml
