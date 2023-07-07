@@ -57,7 +57,10 @@ spec:
               - ReadWriteOnce
               resources:
                 requests:
-                  storage: 1Gi                                        
+                  storage: 1Gi    
+        - name: docker-credentials
+          secret:
+            secretName: docker-basic-user-pass                                                      
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
