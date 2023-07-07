@@ -28,7 +28,7 @@ spec:
     # size appropriate for monitor data will be used.
     volumeClaimTemplate:
       spec:
-        storageClassName: gp2
+        storageClassName: default
         resources:
           requests:
             storage: 10Gi
