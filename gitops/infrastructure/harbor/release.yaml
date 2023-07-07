@@ -17,16 +17,7 @@ spec:
   interval: 1h0m0s
   install:
     remediation:
-      retries: 3
-  postRenderers:
-    - kustomize:
-        patchesStrategicMerge:
-          - kind: Ingress
-            apiVersion: networking.k8s.io/v1
-            metadata:
-              name: harbor-harbor-ingress
-              annotations:
-                acme.cert-manager.io/http01-edit-in-place: "true"                    
+      retries: 3                  
   values:
     expose:
       tls:
@@ -37,6 +28,7 @@ spec:
         annotations:
           kubernetes.io/ingress.class: harbor-nginx 
           cert-manager.io/cluster-issuer: letsencrypt
+          acme.cert-manager.io/http01-edit-in-place: "true" 
         hosts:
           core: "${registryHost}"
     notary:
