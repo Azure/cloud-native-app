@@ -4,6 +4,6 @@ metadata:
   name: harbor-ingress-system
   labels:
     cert-manager.io/disable-validation: "true"
-  annotations:
-    linkerd.io/inject: enabled
-    config.linkerd.io/trace-collector: collector.linkerd:55678 
+#  annotations:
+#    linkerd.io/inject: enabled
+#    config.linkerd.io/trace-collector: collector.linkerd:55678 
