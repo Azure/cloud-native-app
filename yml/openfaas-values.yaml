@@ -7,20 +7,7 @@ dashboard:
 
 # ingress configuration
 ingress:
-  enabled: true
-  ## https://github.com/openfaas/faas-netes/blob/bf6164bebe0d350f18b42f26596dd48862cb3772/chart/openfaas/values.yaml#L179
-  ## For k8s >= 1.18 you need to specify the pathType
-  ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
-  pathType: ImplementationSpecific
-  # Used to create Ingress record (should be used with exposeServices: false).
-  hosts:
-    - host: gateway.openfaas.local  # Replace with gateway.example.com if public-facing
-      serviceName: gateway
-      servicePort: 8080
-      path: /
-  annotations:
-    kubernetes.io/ingress.class: "nginx"    
-    # Secrets must be manually created in the namespace.
+  enabled: false
 
 istio:
   mtls: false
