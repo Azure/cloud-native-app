@@ -53,6 +53,7 @@ spec:
         - name: shared-data
           volumeClaimTemplate:
             spec:
+              storageClassName: rook-ceph-block
               accessModes:
               - ReadWriteOnce
               resources:
