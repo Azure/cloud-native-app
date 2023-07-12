@@ -86,6 +86,7 @@ spec:
         - name: IMAGE
           value: $(params.fn-image-source)
     - name: deploy-using-kubectl-web
+      runAfter: ["build-docker-image-web"]
       taskRef:
         name: deploy-using-kubectl
       workspaces:
@@ -99,6 +100,7 @@ spec:
         - name: image-source
           value: $(params.web-image-source)            
     - name: deploy-using-kubectl-api
+      runAfter: ["build-docker-image-api"]
       taskRef:
         name: deploy-using-kubectl
       workspaces:
@@ -112,6 +114,7 @@ spec:
         - name: image-source
           value: $(params.api-image-source)            
     - name: deploy-using-kubectl-fn
+      runAfter: ["build-docker-image-fn"]
       taskRef:
         name: deploy-using-kubectl
       workspaces:
