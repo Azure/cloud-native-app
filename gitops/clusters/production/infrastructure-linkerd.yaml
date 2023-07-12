@@ -31,4 +31,4 @@ spec:
     - apiVersion: helm.toolkit.fluxcd.io/v1beta1
       kind: HelmRelease
       name: linkerd-viz
-      namespace: linkerd       
+      namespace: linkerd-viz       
