@@ -16,7 +16,8 @@ spec:
         namespace: flux-system
   interval: 1h0m0s
   dependsOn:
-    - name: linkerd/linkerd-jaeger    
+    - name: linkerd-jaeger
+      namespace: linkerd    
   install:
     remediation:
       retries: 3 
