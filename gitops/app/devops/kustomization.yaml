@@ -3,5 +3,5 @@ kind: Kustomization
 namespace: conexp-mvp-devops
 resources:
   - namespace.yaml
-  - infra
-  - app
+  - pipeline
+  - tasks
