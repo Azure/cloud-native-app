@@ -6,6 +6,8 @@ resources:
   - ../../../yml/tekton-limit-range.yaml
   - ../../../yml/app-admin-role.yaml
   - ../../../yml/app-triggers.yaml
+  - https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
+  - https://raw.githubusercontent.com/tektoncd/catalog/main/task/kaniko/0.6/kaniko.yaml
   - ../../../yml/app-pipeline.yaml
   - ../../../yml/tekton-el-ingress.yaml
 patches: 
