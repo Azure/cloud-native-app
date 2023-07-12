@@ -26,12 +26,12 @@ spec:
           secretName: ingress-cert-harbor
       ingress:
         annotations:
-          kubernetes.io/ingress.class: harbor-nginx
+          kubernetes.io/ingress.class: harbor
           ingress.kubernetes.io/ssl-redirect: "true"
           ingress.kubernetes.io/proxy-body-size: "0"
           cert-manager.io/cluster-issuer: letsencrypt
           acme.cert-manager.io/http01-edit-in-place: "true" 
-        className: harbor-nginx
+        className: harbor
         hosts:
           core: "${registryHost}"
     notary:

@@ -22,14 +22,18 @@ spec:
   # https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/values.yaml
   values:
     controller:
-      ingressClassResource: 
-        name: harbor-nginx
-        controllerValue: k8s.io/harbor-nginx
-      ingressClass: harbor-nginx
+      electionID: harbor-ingress-controller-leader
+      ingressClassResource:
+        name: harbor
+        enabled: true
+        default: true
+        controllerValue: k8s.io/harbor
+      ingressClass: harbor
       replicaCount: 2
       service:
         annotations:
-          service.beta.kubernetes.io/azure-dns-label-name: "${registryHostDnsLabel}"      
+          service.beta.kubernetes.io/azure-dns-label-name: "${registryHostDnsLabel}"
+          service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/healthz"      
       nodeSelector:
         beta.kubernetes.io/os: linux
     defaultBackend:

@@ -23,9 +23,17 @@ spec:
   values:
     controller:
       replicaCount: 2
+      electionID: ingress-controller-leader
+      ingressClassResource:
+        name: nginx
+        enabled: true
+        default: true
+        controllerValue: k8s.io/nginx
+      ingressClass: nginx
       service:
         annotations:
           service.beta.kubernetes.io/azure-dns-label-name: "${appHostDnsLabel}" 
+          service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/healthz"
       nodeSelector:
         beta.kubernetes.io/os: linux
     defaultBackend:
