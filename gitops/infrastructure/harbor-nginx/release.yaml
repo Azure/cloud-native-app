@@ -30,6 +30,10 @@ spec:
         controllerValue: k8s.io/harbor
       ingressClass: harbor
       replicaCount: 2
+      pod:
+        annotations:
+          linkerd.io/inject: enabled
+          config.linkerd.io/trace-collector: collector.linkerd-jaeger:55678
       service:
         annotations:
           service.beta.kubernetes.io/azure-dns-label-name: "${registryHostDnsLabel}"
