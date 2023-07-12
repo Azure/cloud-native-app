@@ -2,11 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: conexp-mvp-devops
 resources:
-  - ../../../yml/tekton-limit-range.yaml
-  - ../../../yml/app-admin-role.yaml
-  - ../../../yml/app-triggers.yaml
-  - ../../../yml/app-pipeline.yaml
-  - ../../../yml/tekton-el-ingress.yaml
+  - ../../../../yml/tekton-limit-range.yaml
+  - ../../../../yml/app-admin-role.yaml
+  - ../../../../yml/app-triggers.yaml
+  - ../../../../yml/app-pipeline.yaml
+  - ../../../../yml/tekton-el-ingress.yaml
 patches: 
   - patch: |-
       - op: replace
