@@ -149,8 +149,8 @@ spec:
       args:
         - "-i"
         - "-e"
-        - "s|__IMAGE__|$(params.image-source)|g;s|__SENDGRIDAPIKEY__|{SENDGRIDAPIKEYRELACE}|g;s|__APPHOSTNAME__|{APPHOSTNAMEREPLACE}|g;s|__APIDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpapi;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__WEBDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpweb;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__APIURL__|http://backend-svc.conexp-mvp.svc.cluster.local:80|g;"
-        - "$(workspaces.source.path)/src/$(params.pathToYamlFile)"
+        - "s|__IMAGE__|$(params.image-source.url)|g;s|__SENDGRIDAPIKEY__|${sendGridApiKey}|g;s|__APPHOSTNAME__|${appHostName}|g;s|__APIDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpapi;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__WEBDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpweb;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__APIURL__|http://backend-svc.conexp-mvp.svc.cluster.local:80|g;"
+        - "$(workspaces.source.path)/src/$(params.pathToYamlFile)" 
     - name: print-yaml
       image: alpine
       command: ["cat"]

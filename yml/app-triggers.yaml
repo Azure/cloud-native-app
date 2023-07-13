@@ -63,7 +63,7 @@ spec:
                   storage: 1Gi    
         - name: docker-credentials
           secret:
-            secretName: docker-basic-user-pass                                                      
+            secretName: regcred                                                     
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
@@ -82,11 +82,11 @@ spec:
     - name: gitrepositoryurl
       value: "https://github.com/$(body.repository.full_name)"
     - name: web-imageUrl
-      value: "{registryHost}/conexp/web:$(body.head_commit.id)"
+      value: "${registryHost}/conexp/web:$(body.head_commit.id)"
     - name: api-imageUrl
-      value: "{registryHost}/conexp/api:$(body.head_commit.id)"
+      value: "${registryHost}/conexp/api:$(body.head_commit.id)"
     - name: fn-imageUrl
-      value: "{registryHost}/conexp/emaildispatcher:$(body.head_commit.id)"
+      value: "${registryHost}/conexp/emaildispatcher:$(body.head_commit.id)"
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
@@ -102,22 +102,11 @@ spec:
         ref: conexp-triggertemplate        
 ---
 apiVersion: v1
-kind: Secret
-metadata:
-  name: docker-basic-user-pass
-  annotations:
-    tekton.dev/docker-0: http://{registryHost}
-type: kubernetes.io/basic-auth
-stringData:
-  username: conexp
-  password: FTA@CNCF0n@zure3
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: deployment-user
 secrets:
-  - name: docker-basic-user-pass
+  - name: regcred
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1

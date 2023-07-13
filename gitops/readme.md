@@ -210,6 +210,18 @@ rm regcred-openfaas.yaml
 
 cd ../../..
 
+cd gitops/app/devops
+
+kubectl create secret docker-registry regcred \
+--docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn -oyaml --dry-run=client \
+> regcred-devops.yaml
+
+kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+< regcred-devops.yaml > regcred-devops-sealed.yaml
+rm regcred-devops.yaml
+
+cd ../../..
+
 ```
 
 Commit the Repo

@@ -3,5 +3,10 @@ kind: Kustomization
 namespace: conexp-mvp-devops
 resources:
   - namespace.yaml
-  - infra
-  - app
+  - ../../../yml/tekton-limit-range.yaml
+  - ../../../yml/app-admin-role.yaml
+  - ../../../yml/app-triggers.yaml
+  - ../../../yml/app-pipeline.yaml
+  - ../../../yml/tekton-el-ingress.yaml
+  - git-clone.yaml
+  - https://raw.githubusercontent.com/tektoncd/catalog/main/task/kaniko/0.6/kaniko.yaml 
