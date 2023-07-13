@@ -4,10 +4,3 @@ namespace: nats
 resources:
   - namespace.yaml
   - release.yaml
-  - ../../../../yml/openfaas-nats-connector.yaml
-configMapGenerator:
-- name: helm-values
-  files:
-  - ../../../../yml/openfaas-values.yaml
-generatorOptions:
-  disableNameSuffixHash: true
