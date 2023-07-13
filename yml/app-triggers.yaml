@@ -33,7 +33,9 @@ spec:
           name: conexp-pipeline
         podTemplate:
           nodeSelector:
-            kubernetes.io/os: linux         
+            kubernetes.io/os: linux
+          securityContext:
+            fsGroup: 65532                     
         params:
           - name: deployment-namespace
             value: $(tt.params.deployment-namespace)
