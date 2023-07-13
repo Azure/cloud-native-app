@@ -9,7 +9,6 @@ spec:
   chart:
     spec:
       chart: nats
-      version: '2.9.19'
       sourceRef:
         kind: HelmRepository
         name: nats
@@ -19,6 +18,11 @@ spec:
     remediation:
       retries: 3
   values:
+    nats:
+      image:
+        repository: nats
+        tag: 2.9.19-alpine
+        pullPolicy: IfNotPresent 
     cluster:
       enabled: true
       replicas: 3
