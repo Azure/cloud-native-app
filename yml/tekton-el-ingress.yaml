@@ -12,10 +12,10 @@ spec:
  ingressClassName: nginx
  tls:
  - hosts: 
-   - ${cicdWebhook}
+   - {cicdWebhook}
    secretName: webhook-tls
  rules:
-  - host: ${cicdWebhook}
+  - host: {cicdWebhook}
     http:
       paths:
       - path: /cd(/|$)(.*)

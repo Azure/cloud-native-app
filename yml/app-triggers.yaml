@@ -82,11 +82,11 @@ spec:
     - name: gitrepositoryurl
       value: "https://github.com/$(body.repository.full_name)"
     - name: web-imageUrl
-      value: "${registryHost}/conexp/web:$(body.head_commit.id)"
+      value: "{registryHost}/conexp/web:$(body.head_commit.id)"
     - name: api-imageUrl
-      value: "${registryHost}/conexp/api:$(body.head_commit.id)"
+      value: "{registryHost}/conexp/api:$(body.head_commit.id)"
     - name: fn-imageUrl
-      value: "${registryHost}/conexp/emaildispatcher:$(body.head_commit.id)"
+      value: "{registryHost}/conexp/emaildispatcher:$(body.head_commit.id)"
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener

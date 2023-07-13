@@ -10,3 +10,50 @@ resources:
   - ../../../yml/tekton-el-ingress.yaml
   - git-clone.yaml
   - https://raw.githubusercontent.com/tektoncd/catalog/main/task/kaniko/0.6/kaniko.yaml 
+patches: 
+  - patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: ${cicdWebhookHost}    
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: ${cicdWebhookHost}                    
+    target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress 
+      name: ingress-resource
+  - patch: |-
+      - op: replace
+        path: /spec/steps/0/args
+        value:
+          - "-i"
+          - "-e"
+          - "s|__IMAGE__|$(params.image-source.url)|g;s|__SENDGRIDAPIKEY__|${sendGridApiKey}|g;s|__APPHOSTNAME__|${appHostName}|g;s|__APIDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpapi;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__WEBDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpweb;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__APIURL__|http://backend-svc.conexp-mvp.svc.cluster.local:80|g;"
+          - "$(workspaces.source.path)/src/$(params.pathToYamlFile)"                              
+    target:
+      group: tekton.dev
+      version: v1beta1
+      kind: Task
+      name: deploy-using-kubectl
+  - patch: |-
+      - op: replace
+        path: /spec/params/5
+        value: 
+          name: web-imageUrl
+          value: "${registryHost}/conexp/web:$(body.head_commit.id)"
+      - op: replace
+        path: /spec/params/6
+        value: 
+          name: api-imageUrl
+          value: "${registryHost}/conexp/api:$(body.head_commit.id)"
+      - op: replace
+        path: /spec/params/7
+        value: 
+          name: fn-imageUrl
+          value: "${registryHost}/conexp/emaildispatcher:$(body.head_commit.id)"                   
+    target:
+      group: triggers.tekton.dev
+      version: v1alpha1
+      kind: TriggerBinding    
+      name: conexp-pipelinebinding   
