@@ -1,0 +1,24 @@
+
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nats
+  namespace: nats
+spec:
+  releaseName: nats
+  chart:
+    spec:
+      chart: nats
+      version: '1.0.0.0-rc.0'
+      sourceRef:
+        kind: HelmRepository
+        name: nats
+        namespace: flux-system
+  interval: 1h0m0s
+  install:
+    remediation:
+      retries: 3
+  values:
+    cluster:
+      enabled: true
+      replicas: 3
