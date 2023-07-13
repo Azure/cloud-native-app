@@ -3,7 +3,7 @@ kind: SealedSecret
 metadata:
   creationTimestamp: null
   name: regcred
-  namespace: openfaas-fn
+  namespace: conexp-mvp-devops
 spec:
   encryptedData:
     .dockerconfigjson: AgBvs6nD6z7UdjRyg3eBZCccze/f+qcyr2pMc7TbFP1iGFZwwTh3tU1bPuVxh9Om2T0zZP+mvN/vtZdfgtuIZQNSm/YKcUOqRkB6ZQj/ACv62m3JWyVt/Z2g0uoZJjoa4W+50JwKJLvYWqFNVxcIqzSMdF6HbYQ8eiKWk+zfqt7TF7GYg6ZD0GSklCL8J/gQWyzrVBF80N/2cACNudGq5surNbarDU0iQg8Em1nGm+IVvEN17JeSLiTe9fczjDEVcqm1tG01lT1lEvTk5h4ZwQ+FAOZvLKrES7J3jLEk2GyOa3DhZiMmnbbQKMCUaopkEYPh4kNy7QRosiuwynaF1lTvql2YFUpwk/L657SXf3bBRi5zYGrChW5TtOGS6GdvcV7QA/O8HlgkrI+kjbFBv2vroHExEWkfN4OBV4rHHgsst8T08Kohv23wpjf+VExF33rRp2RajPjphjNHlnshigRuy+3Zk87N17atd7assWkGpcUUTN4tBrDV0kbwc36uOTbcBpZMAHoZQgBS5Q48pnvhIERO/uFPex5CrULJbK5O1+Xx4rcNcuC3IOA5EGtL8e5FqMGlKXte5dVduA2KpMv2BoIT9OmoVR8hUoI0/45/08S4phJDGYnhj6N8JuZbnDUywNAVL6kkE3SU+nv9+9TvbZDnNxYUBhIWRDtu2A9p+W5n64w979lpuM6cfj7L4B3GUDzTH0geiGqnW4YHLHglwCepV8QT9CDpEiq44i4P+Ds2In5cJPYs44XLvm3y1pyCUxEVgenVOeJl0R3ubaO93Hf5Jad+zeTQhwUvBtI3SmBa2kSQSpYhB5aBugdEEfTOQXPFukh97t0QwO58gdyRlyEUvUDEd99NkpeO1B5vjWC+/ehH27Pb50a5dPeMp3QqXBzH1W3IYAvQpOx/zb2SR11vNY3cgxvWc+cOMQGknusrBfqGYzU=
@@ -11,6 +11,6 @@ spec:
     metadata:
       creationTimestamp: null
       name: regcred
-      namespace: openfaas-fn
+      namespace: conexp-mvp-devops
     type: kubernetes.io/dockerconfigjson
 
