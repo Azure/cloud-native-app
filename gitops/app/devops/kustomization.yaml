@@ -10,6 +10,7 @@ resources:
   - ../../../yml/tekton-el-ingress.yaml
   - git-clone.yaml
   - https://raw.githubusercontent.com/tektoncd/catalog/main/task/kaniko/0.6/kaniko.yaml 
+  - regcred-devops-sealed.yaml
 patches: 
   - patch: |-
       - op: replace
