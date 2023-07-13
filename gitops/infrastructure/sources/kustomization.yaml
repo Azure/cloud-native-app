@@ -12,3 +12,4 @@ resources:
   - linkerd.yaml
   - rook.yaml
   - weaveworks.yaml
+  - nats.yaml
