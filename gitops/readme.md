@@ -212,9 +212,21 @@ cd ../../..
 
 cd gitops/app/devops
 
-kubectl create secret docker-registry regcred \
---docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp-devops -oyaml --dry-run=client \
-> regcred-devops.yaml
+CONFIG="\
+{\n
+    \"auths\": {\n
+        \"${registryHost}\": {\n
+            \"username\": \"conexp\",\n
+            \"password\": \"FTA@CNCF0n@zure3\",\n
+            \"email\": \"user@mycompany.com\",\n
+            \"auth\": \"Y29uZXhwOkZUQUBDTkNGMG5AenVyZTM=\"\n
+        }\n
+    }\n
+}\n"
+
+printf "${CONFIG}" > config.json
+kubectl create secret generic regcred --from-file=config.json=config.json  -oyaml --dry-run=client  > regcred-devops.yaml
+rm config.json
 
 kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
 < regcred-devops.yaml > regcred-devops-sealed.yaml
