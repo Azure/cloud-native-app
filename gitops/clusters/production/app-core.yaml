@@ -10,7 +10,7 @@ spec:
     - name: infrastructure-harbor
     - name: infrastructure-mysql
     - name: infrastructure-linkerd
-    - name: infrastructure-openfaas
+    - name: infrastructure-knative-channel
     - name: infrastructure-seed
   sourceRef:
     kind: GitRepository

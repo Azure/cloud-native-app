@@ -78,7 +78,7 @@ spec:
     - name: deployment-namespace
       value: conexp-mvp
     - name: fn-deployment-namespace
-      value: openfaas-fn      
+      value: conexp-mvp-fn      
     - name: gitrepositoryurl
       value: "https://github.com/$(body.repository.full_name)"
     - name: web-imageUrl

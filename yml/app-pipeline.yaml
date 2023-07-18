@@ -11,7 +11,7 @@ spec:
     - name: fn-deployment-namespace
       type: string
       description: namespace to deploy the function yaml
-      default: openfaas-fn      
+      default: conexp-mvp-fn      
     - name: git-revision
       type: string
     - name: git-url
@@ -80,7 +80,7 @@ spec:
         workspace: docker-credentials              
       params:
         - name: DOCKERFILE
-          value: Contoso.Expenses.OpenFaaS/Dockerfile
+          value: Contoso.Expenses.Function/Dockerfile
         - name: CONTEXT
           value: /src
         - name: IMAGE
