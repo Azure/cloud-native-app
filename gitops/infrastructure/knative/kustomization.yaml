@@ -4,9 +4,6 @@ resources:
   - https://github.com/knative/serving/releases/download/knative-v1.10.2/serving-core.yaml
   - https://github.com/knative/net-kourier/releases/download/knative-v1.10.0/kourier.yaml
   - https://github.com/knative/eventing/releases/download/knative-v1.10.1/eventing-core.yaml
-  - https://github.com/knative/eventing/releases/download/knative-v1.10.1/in-memory-channel.yaml
-  - https://github.com/knative/eventing/releases/download/knative-v1.10.1/mt-channel-broker.yaml
-  - ../../../yml/knative-broker.yaml
 patches: 
   - patch: |-
       - op: replace
