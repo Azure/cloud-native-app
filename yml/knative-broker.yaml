@@ -1,5 +1,5 @@
 apiVersion: eventing.knative.dev/v1
-kind: broker
+kind: Broker
 metadata:
   name: default
   namespace: conexp-mvp-fn
