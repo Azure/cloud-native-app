@@ -5,6 +5,7 @@ using Contoso.Expenses.Web.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using NATS.Client;
 using Newtonsoft.Json;
@@ -21,11 +22,11 @@ namespace Contoso.Expenses.Web.Pages.Expenses
         private readonly ContosoExpensesWebContext _context;
         private string costCenterAPIUrl;
         private readonly QueueInfo _queueInfo;
-        private readonly IHostingEnvironment _env;
+        private readonly IWebHostEnvironment _env;
         private readonly IMetrics _metrics;
 
         public CreateModel(ContosoExpensesWebContext context, IOptions<ConfigValues> config, QueueInfo queueInfo,
-                            IHostingEnvironment env, IMetrics metrics)
+                            IWebHostEnvironment env, IMetrics metrics)
         {
             _metrics = metrics;
             _context = context;
@@ -76,7 +77,7 @@ namespace Contoso.Expenses.Web.Pages.Expenses
 
             //ToDo: Until we figure out how to OpenFaaS locally/container, ignoring OpenFaaS stuff locally. Otherwise this will fail
             //https://secanablog.wordpress.com/2018/06/10/run-your-own-faas-with-openfaas-and-net-core/
-            if (!_env.IsDevelopment())
+            if (!_env.IsEnvironment("Development"))
             {
                 // Serialize the expense and write it to the NATS Queue
                 var cf = new ConnectionFactory();
