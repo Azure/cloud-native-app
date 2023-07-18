@@ -8,7 +8,7 @@ spec:
   dependsOn:
     - name: infrastructure-jaeger
     - name: infrastructure-prometheus
-    - name: infrastructure-openfaas
+    - name: infrastructure-knative-channel
     - name: infrastructure-mysql  
   sourceRef:
     kind: GitRepository

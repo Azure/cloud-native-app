@@ -21,3 +21,11 @@ patches:
       version: v1
       kind: ConfigMap 
       name: config-domain     
+  - patch: |-
+      - op: replace
+        path: /data
+        value: {"enable-scale-to-zero": "true"}              
+    target:
+      version: v1
+      kind: ConfigMap 
+      name: config-autoscaler       

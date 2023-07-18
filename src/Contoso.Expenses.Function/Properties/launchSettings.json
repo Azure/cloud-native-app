@@ -15,7 +15,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Contoso.Expenses.OpenFaaS": {
+    "Contoso.Expenses.Function": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
