@@ -125,7 +125,7 @@ CONFIG="\
 printf "${CONFIG}" > config.json
 
 echo "## Generate registry secrets for tekton pipelines"
-sudo sh -c "kubectl create secret generic regcred --from-file=config.json=config.json  -oyaml --dry-run=client  > regcred-devops.yaml"
+sudo sh -c "kubectl create secret generic regcred --from-file=config.json=config.json -n conexp-mvp-devops -oyaml --dry-run=client  > regcred-devops.yaml"
 rm config.json
 
 echo "## Seal the secret"

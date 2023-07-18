@@ -186,7 +186,7 @@ CONFIG="\
 }\n"
 
 printf "${CONFIG}" > config.json
-kubectl create secret generic regcred --from-file=config.json=config.json  -oyaml --dry-run=client  > regcred-devops.yaml
+kubectl create secret generic regcred --from-file=config.json=config.json -n conexp-mvp-devops  -oyaml --dry-run=client  > regcred-devops.yaml
 rm config.json
 
 kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
