@@ -201,12 +201,12 @@ kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
 rm regcred-conexp.yaml
 
 kubectl create secret docker-registry regcred \
---docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn -oyaml --dry-run=client \
-> regcred-openfaas.yaml
+--docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp-fn -oyaml --dry-run=client \
+> regcred-fn.yaml
 
 kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
-< regcred-openfaas.yaml > regcred-openfaas-sealed.yaml
-rm regcred-openfaas.yaml
+< regcred-fn.yaml > regcred-fn-sealed.yaml
+rm regcred-fn.yaml
 
 cd ../../..
 
