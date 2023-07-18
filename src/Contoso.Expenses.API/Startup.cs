@@ -38,7 +38,8 @@ namespace Contoso.Expenses.API
             services.AddControllers();
 
             string connectionString = Configuration["ConnectionStrings:DBConnectionString"];
-            services.AddDbContextPool<DatabaseContext>(options => options.UseMySql(connectionString));
+            ServerVersion version = ServerVersion.AutoDetect(connectionString);
+            services.AddDbContextPool<DatabaseContext>(options => options.UseMySql(connectionString, version));
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
