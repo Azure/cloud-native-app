@@ -4,4 +4,5 @@ namespace: conexp-mvp-fn
 resources:
   - namespace.yaml
   - ../regcred-fn-sealed.yaml
+  - ../../../../yml/knative-broker.yaml
   - ../../../../yml/app-deploy-rolebinding.yaml
