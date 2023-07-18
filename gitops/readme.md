@@ -34,46 +34,6 @@ The cluster components will take around 12 minutes to deploy. You can check the 
 ```bash
 kubectl get Kustomizations -A
 ```
-
-### Urls for the components
-
-```bash
-# Tekton
-kubectl port-forward svc/tekton-dashboard 8080:9097  -n tekton-pipelines
-Browse to http://localhost:8080
-
-# Linkerd
-kubectl port-forward svc/web 8084:8084  -n linkerd-viz
-Browse to http://localhost:8084
-
-#Jaeger
-kubectl port-forward svc/jaeger-query 8060:80 -n tracing
-Browse to http://localhost:8060
-
-# Grafana
-kubectl port-forward deploy/prometheus-grafana 8070:3000 -n monitoring
-Browse to http://localhost:8070 and use the username/password as admin/FTA@CNCF0n@zure3
-
-# Prometheus
-kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring 
-Browse to http://localhost:9090
-
-# Openfaas
-kubectl port-forward deploy/gateway 8080:8080 -n openfaas
-Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
-
-# Harbor Url
-echo $registryHost
-
-# App Url
-echo $appHostName
-
-```
-
-Invoke the CICD pipeline by making a small edit to the read.me file in Github. Observe the deployment in Tekton Dashboard. The app deployment should take around 5 minutes.
-
-Navigate to the appHost in the browser to test the app.
-
 ## Option 2
 
 Alternatively, use the instructions below
@@ -262,5 +222,48 @@ curl -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$owner/cloud-native-app/hooks \
   -d "{\"config\":{\"url\":\"https://$appHostName/cd\",\"content_type\":\"json\"}}"
 ```
+
+## Urls for the components
+
+```bash
+# Flux UI
+kubectl port-forward svc/weave-gitops 9001:9001  -n flux-system
+Browse to http://localhost:9001 and use the username/password as admin/flux
+
+# Tekton
+kubectl port-forward svc/tekton-dashboard 8080:9097  -n tekton-pipelines
+Browse to http://localhost:8080
+
+# Linkerd
+kubectl port-forward svc/web 8084:8084  -n linkerd-viz
+Browse to http://localhost:8084
+
+#Jaeger
+kubectl port-forward svc/jaeger-query 8060:80 -n tracing
+Browse to http://localhost:8060
+
+# Grafana
+kubectl port-forward deploy/prometheus-grafana 8070:3000 -n monitoring
+Browse to http://localhost:8070 and use the username/password as admin/FTA@CNCF0n@zure3
+
+# Prometheus
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring 
+Browse to http://localhost:9090
+
+# Openfaas
+kubectl port-forward deploy/gateway 8080:8080 -n openfaas
+Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
+
+# Harbor Url
+echo $registryHost
+
+# App Url
+echo $appHostName
+
+```
+
+Invoke the CICD pipeline by making a small edit to the read.me file in Github. Observe the deployment in Tekton Dashboard. The app deployment should take around 5 minutes.
+
+Navigate to the appHost in the browser to test the app.
 
 Test Stub #2
