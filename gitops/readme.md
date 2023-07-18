@@ -38,6 +38,8 @@ kubectl get Kustomizations -A
 
 Alternatively, use the instructions below
 
+Note: Start at the root of the directory in the repo
+
 ### Install Flux
 
 ```bash
@@ -80,7 +82,7 @@ flux bootstrap github \
 wget https://github.com/smallstep/cli/releases/download/v0.23.4/step-cli_0.23.4_amd64.deb
 sudo dpkg -i step-cli_0.23.4_amd64.deb
 
-cd cloud-native-app/gitops/infrastructure/linkerd
+cd gitops/infrastructure/linkerd
 
 step certificate create identity.linkerd.cluster.local ca.crt ca.key \
 --profile root-ca --no-password --insecure \
@@ -100,11 +102,12 @@ kubectl rollout status deployment sealed-secrets-controller -n flux-system
 kubeseal --fetch-cert \
 --controller-name=sealed-secrets-controller \
 --controller-namespace=flux-system \
-> ../../../../pub-sealed-secrets.pem
+> ../../../pub-sealed-secrets.pem
 
-kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
 < certs.yaml > certs-sealed.yaml
 rm certs.yaml
+rm ca.crt issuer.crt issuer.key ca.key
 
 cd ../../..
 
@@ -141,7 +144,7 @@ kubectl create secret generic gitops-variables --from-literal=registryHost=$regi
 	-n flux-system -oyaml --dry-run=client \
 	> gitops-variables.yaml
   
-kubeseal --format=yaml --cert=../pub-sealed-secrets.pem \
+kubeseal --format=yaml --cert=pub-sealed-secrets.pem \
 < gitops-variables.yaml > gitops-variables-sealed.yaml  
 
 rm gitops-variables.yaml
@@ -156,7 +159,7 @@ kubectl create secret docker-registry regcred \
 --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp -oyaml --dry-run=client \
 > regcred-conexp.yaml
 
-kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
 < regcred-conexp.yaml > regcred-conexp-sealed.yaml
 rm regcred-conexp.yaml
 
@@ -164,7 +167,7 @@ kubectl create secret docker-registry regcred \
 --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp-fn -oyaml --dry-run=client \
 > regcred-fn.yaml
 
-kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
 < regcred-fn.yaml > regcred-fn-sealed.yaml
 rm regcred-fn.yaml
 
@@ -188,12 +191,13 @@ printf "${CONFIG}" > config.json
 kubectl create secret generic regcred --from-file=config.json=config.json  -oyaml --dry-run=client  > regcred-devops.yaml
 rm config.json
 
-kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
 < regcred-devops.yaml > regcred-devops-sealed.yaml
 rm regcred-devops.yaml
 
 cd ../../..
 
+rm step-cli_0.23.4_amd64.deb pub-sealed-secrets.pem
 ```
 
 Commit the Repo
