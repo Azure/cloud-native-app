@@ -73,8 +73,7 @@ namespace Contoso.Expenses.Web
             {
                 return new QueueInfo()
                 {
-                    ConnectionString = Configuration["ConnectionStrings:NATSConnectionString"],
-                    QueueName = Configuration["TopicName"]
+                    ConnectionString = Configuration["ConnectionStrings:BrokerConnectionString"]
                 };
             });
 

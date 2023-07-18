@@ -12,12 +12,11 @@
     <PackageReference Include="App.Metrics.AspNetCore.Endpoints" Version="4.3.0" />
     <PackageReference Include="App.Metrics.AspNetCore.Tracking" Version="4.3.0" />
     <PackageReference Include="App.Metrics.Formatters.Prometheus" Version="4.3.0" />
+    <PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.6.0" />
     <PackageReference Include="Jaeger" Version="1.0.3" />
     <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="2.3.24" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.1.0" />
-    <PackageReference Include="NATS.Client" Version="1.0.7" />
     <PackageReference Include="OpenTracing.Contrib.NetCore" Version="0.9.0" />
-    <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
