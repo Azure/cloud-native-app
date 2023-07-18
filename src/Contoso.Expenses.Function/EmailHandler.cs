@@ -7,7 +7,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Contoso.Expenses.OpenFaaS
+namespace Contoso.Expenses.Function
 {
     public class EmailHandler
     {
@@ -29,7 +29,7 @@ namespace Contoso.Expenses.OpenFaaS
 
             var message = new SendGridMessage();
             message.From = new EmailAddress(emailFrom, "Contoso Expenses");
-            message.AddTo(emailTo, "Srikant Sarwa");
+            message.AddTo(emailTo, null);
             message.Subject = emailSubject;
             message.AddContent(MimeType.Html, emailBody);
 

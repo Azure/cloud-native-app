@@ -87,6 +87,7 @@ namespace Contoso.Expenses.Web.Pages.Expenses
 
                 var httpClient = new HttpClient();
                 var result = await httpClient.PostAsync(_queueInfo.ConnectionString, content);
+                
             }
             // Ensure the DB write is complete
             t.Wait();

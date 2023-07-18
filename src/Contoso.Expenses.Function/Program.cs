@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Contoso.Expenses.OpenFaaS
+namespace Contoso.Expenses.Function
 {
     public class Program
     {

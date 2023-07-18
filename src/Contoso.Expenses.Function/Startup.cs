@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using CloudNative.CloudEvents.NewtonsoftJson;
 using System;
+using CloudNative.CloudEvents;
 
-namespace Contoso.Expenses.OpenFaaS
+namespace Contoso.Expenses.Function
 {
     public class Startup
     {
