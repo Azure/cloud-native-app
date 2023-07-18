@@ -7,6 +7,7 @@
 - Create a [PAT token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the repo (check the repo box as scope)
 - Clone the fork to workstation
 
+Note: Start at the root of the directory in the repo
 ## Option 1
 
 ### Script Install
@@ -26,7 +27,7 @@ export cluster_issuer_email="<<EMAIL>>"
 export sendGridApiKey="<<set the api key>>"
 
 
-. ./cloud-native-app/gitops/setup.sh
+. ./gitops/setup.sh
 
 ```
 The cluster components will take around 12 minutes to deploy. You can check the status (all should read True) with the below command
@@ -37,8 +38,6 @@ kubectl get Kustomizations -A
 ## Option 2
 
 Alternatively, use the instructions below
-
-Note: Start at the root of the directory in the repo
 
 ### Install Flux
 
@@ -106,8 +105,7 @@ kubeseal --fetch-cert \
 
 kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
 < certs.yaml > certs-sealed.yaml
-rm certs.yaml
-rm ca.crt issuer.crt issuer.key ca.key
+rm certs.yaml ca.crt issuer.crt issuer.key ca.key
 
 cd ../../..
 

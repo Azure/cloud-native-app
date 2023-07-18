@@ -28,4 +28,44 @@ patches:
     target:
       version: v1
       kind: ConfigMap 
-      name: config-autoscaler       
+      name: config-autoscaler   
+  - patch: |-
+      - op: replace
+        path: /data
+        value: {}              
+    target:
+      version: v1
+      kind: ConfigMap 
+      name: config-observability        
+  - patch: |-
+      - op: replace
+        path: /data
+        value: {}              
+    target:
+      version: v1
+      kind: ConfigMap 
+      name: config-tracing          
+  - patch: |-
+      - op: replace
+        path: /data
+        value: {}              
+    target:
+      version: v1
+      kind: ConfigMap 
+      name: config-logging      
+  - patch: |-
+      - op: replace
+        path: /data
+        value: {}              
+    target:
+      version: v1
+      kind: ConfigMap 
+      name: config-gc
+  - patch: |-
+      - op: replace
+        path: /data
+        value: {}              
+    target:
+      version: v1
+      kind: ConfigMap 
+      name: config-leader-election             

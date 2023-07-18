@@ -19,7 +19,7 @@ echo "## Install Step"
 sudo wget https://github.com/smallstep/cli/releases/download/v0.23.4/step-cli_0.23.4_amd64.deb
 sudo dpkg -i step-cli_0.23.4_amd64.deb
 
-cd cloud-native-app/gitops/infrastructure/linkerd
+cd gitops/infrastructure/linkerd
 
 echo "## Generate Certificates for linkerd"
 sudo step certificate create identity.linkerd.cluster.local ca.crt ca.key \
@@ -43,12 +43,12 @@ echo "## Download kube seal publick key"
 sudo sh -c "kubeseal --fetch-cert \
 --controller-name=sealed-secrets-controller \
 --controller-namespace=flux-system \
-> ../../../../pub-sealed-secrets.pem"
+> ../../../pub-sealed-secrets.pem"
 
 echo "# Seal Certs Secrets"
-sudo sh -c "kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+sudo sh -c "kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
 < certs.yaml > certs-sealed.yaml"
-sudo rm certs.yaml
+sudo rm certs.yaml ca.crt issuer.crt issuer.key ca.key
 
 cd ../../..
 
@@ -74,7 +74,7 @@ sudo sh -c "kubectl create secret generic gitops-variables --from-literal=regist
 	> gitops-variables.yaml"
 
 echo "## Seal secret for variable substitution"
-sudo sh -c "kubeseal --format=yaml --cert=../pub-sealed-secrets.pem \
+sudo sh -c "kubeseal --format=yaml --cert=pub-sealed-secrets.pem \
 < gitops-variables.yaml > gitops-variables-sealed.yaml"
 sudo rm gitops-variables.yaml	
 
@@ -91,21 +91,51 @@ sudo sh -c "kubectl create secret docker-registry regcred \
 	> regcred-conexp.yaml"
 
 echo "## Seal the secret"
-sudo sh -c "kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+sudo sh -c "kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
 < regcred-conexp.yaml > regcred-conexp-sealed.yaml"
 sudo rm regcred-conexp.yaml
 
-echo "## Generate registry secrets for openfaas namespace"
+echo "## Generate registry secrets for conexp-mvp-fn namespace"
 sudo sh -c "kubectl create secret docker-registry regcred \
 	--docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn -oyaml --dry-run=client \
-	> regcred-openfaas.yaml"
+	> regcred-fn.yaml"
 
 echo "## Seal the secret"
-sudo sh -c "kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
-< regcred-openfaas.yaml > regcred-openfaas-sealed.yaml"
-sudo rm regcred-openfaas.yaml
+sudo sh -c "kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
+< regcred-fn.yaml > regcred-fn-sealed.yaml"
+sudo rm regcred-fn.yaml
 
 cd ../../..
+
+cd gitops/app/devops
+
+echo "## Create dockerconfig for tekton pipelines"
+CONFIG="\
+{\n
+    \"auths\": {\n
+        \"${registryHost}\": {\n
+            \"username\": \"conexp\",\n
+            \"password\": \"FTA@CNCF0n@zure3\",\n
+            \"email\": \"user@mycompany.com\",\n
+            \"auth\": \"Y29uZXhwOkZUQUBDTkNGMG5AenVyZTM=\"\n
+        }\n
+    }\n
+}\n"
+
+printf "${CONFIG}" > config.json
+
+echo "## Generate registry secrets for tekton pipelines"
+sudo sh -c "kubectl create secret generic regcred --from-file=config.json=config.json  -oyaml --dry-run=client  > regcred-devops.yaml"
+rm config.json
+
+echo "## Seal the secret"
+sudo sh -c "kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
+< regcred-devops.yaml > regcred-devops-sealed.yaml"
+rm regcred-devops.yaml
+
+cd ../../..
+
+rm step-cli_0.23.4_amd64.deb pub-sealed-secrets.pem
 
 echo "## Commit the changes to the git repo"
 sudo git remote set-url origin "https://$owner:$GITHUB_TOKEN@github.com/$owner/cloud-native-app.git"
