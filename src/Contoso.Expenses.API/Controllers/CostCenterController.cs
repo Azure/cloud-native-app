@@ -34,12 +34,12 @@ namespace Contoso.Expenses.API.Controllers
 
             if (costCenter != null)
             {
-                Console.WriteLine("Cost Center with email {0} found." + email);
+                Console.WriteLine("Cost Center with email {0} found.", email);
                 return costCenter;
             }
             else
             {
-                Console.WriteLine("Cost Center with email {0} not found." + email);
+                Console.WriteLine("Cost Center with email {0} not found.", email);
                 return null;
             }
         }
