@@ -28,7 +28,7 @@ spec:
         name: conexp-pipeline-run-$(uid)
         namespace: $(tt.params.namespace)
       spec:
-        serviceAccountName: deployment-user
+        serviceAccountName: deployment-user     
         taskRunSpecs:
         - pipelineTaskName: build-docker-image-web
           stepOverrides:
@@ -36,7 +36,7 @@ spec:
             resources:
               limits:
                 cpu: 200m
-                memory: 768Mi
+                memory: 1064Mi
               requests:
                 cpu: 100m
                 memory: 512Mi        
