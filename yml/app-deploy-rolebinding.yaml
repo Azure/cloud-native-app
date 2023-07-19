@@ -4,7 +4,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pipeline-role
 rules:
-- apiGroups: ["", "extensions", "apps", "openfaas.com"]
+- apiGroups: ["", "extensions", "apps"]
   resources: ["*"]
   verbs: ["*"]
 ---

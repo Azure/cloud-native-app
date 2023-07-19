@@ -97,7 +97,7 @@ sudo rm regcred-conexp.yaml
 
 echo "## Generate registry secrets for conexp-mvp-fn namespace"
 sudo sh -c "kubectl create secret docker-registry regcred \
-	--docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn -oyaml --dry-run=client \
+	--docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conecp-mvp-fn -oyaml --dry-run=client \
 	> regcred-fn.yaml"
 
 echo "## Seal the secret"

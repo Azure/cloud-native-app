@@ -252,10 +252,6 @@ Browse to http://localhost:8070 and use the username/password as admin/FTA@CNCF0
 kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring 
 Browse to http://localhost:9090
 
-# Openfaas
-kubectl port-forward deploy/gateway 8080:8080 -n openfaas
-Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
-
 # Harbor Url
 echo $registryHost
 
