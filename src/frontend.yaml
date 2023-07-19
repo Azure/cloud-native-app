@@ -68,7 +68,9 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: conexp-frontend-svc
-          servicePort: 80
+          service:
+            name: conexp-frontend-svc
+            port:
+              number: 80
         path: /(.*)
         pathType: Prefix
