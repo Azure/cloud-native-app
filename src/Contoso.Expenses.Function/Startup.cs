@@ -22,6 +22,8 @@ namespace Contoso.Expenses.Function
         {
             app.Run(async (context) =>
             {
+                Console.WriteLine("context.Request.Path: {0}", context.Request.Path);
+
                 if (context.Request.Path != "/")
                 {
                     context.Response.StatusCode = 404;
@@ -29,6 +31,7 @@ namespace Contoso.Expenses.Function
                     return;
                 }
 
+                Console.WriteLine("context.Request.Method: {0}", context.Request.Method);
                 if (context.Request.Method != "POST")
                 {
                     context.Response.StatusCode = 405;
@@ -45,11 +48,13 @@ namespace Contoso.Expenses.Function
                 }
                 catch (NotImplementedException nie)
                 {
+                    Console.WriteLine(nie.ToString());
                     context.Response.StatusCode = 501;
                     await context.Response.WriteAsync(nie.ToString());
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.ToString());
                     context.Response.StatusCode = 500;
                     await context.Response.WriteAsync(ex.ToString());
                 }
