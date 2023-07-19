@@ -29,6 +29,17 @@ spec:
         namespace: $(tt.params.namespace)
       spec:
         serviceAccountName: deployment-user
+        taskRunSpecs:
+        - pipelineTaskName: build-docker-image-web
+          stepOverrides:
+          - name: build-docker-image-web
+            resources:
+              limits:
+                cpu: 200m
+                memory: 768Mi
+              requests:
+                cpu: 100m
+                memory: 512Mi        
         pipelineRef:
           name: conexp-pipeline
         podTemplate:
