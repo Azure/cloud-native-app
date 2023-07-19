@@ -20,6 +20,7 @@ apiVersion: eventing.knative.dev/v1
 kind: Trigger
 metadata:
   name: dispatch-email
+  namespace: conexp-mvp-fn
 spec:
   broker: default
   filter:
