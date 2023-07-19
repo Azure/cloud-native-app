@@ -113,7 +113,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pipeline-role
 rules:
-- apiGroups: ["", "extensions", "apps"]
+- apiGroups: ["", "extensions", "apps", "apiextensions.k8s.io", "serving.knative.dev", "eventing.knative.dev"]
   resources: ["*"]
   verbs: ["*"]
 ---
