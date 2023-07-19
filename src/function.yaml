@@ -21,15 +21,15 @@ spec:
 apiVersion: eventing.knative.dev/v1
 kind: Trigger
 metadata:
-  name: dispatch-email
+  name: expenseemailsender
   namespace: conexp-mvp-fn
 spec:
   broker: default
   filter:
     attributes:
-      type: dispatch-email
+      type: contoso.web.dispatchemail
   subscriber:
     ref:
      apiVersion: serving.knative.dev/v1
      kind: Service
-     name: dispatch-email          
+     name: expenseemailsender          
