@@ -12,6 +12,8 @@ spec:
       - name: regcred  
       containers:
       - image: __IMAGE__
+        ports:
+        - containerPort: 80
         env:
         - name: SENDGRID_API_KEY
           value: "__SENDGRIDAPIKEY__"
