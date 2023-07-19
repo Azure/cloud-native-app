@@ -16,6 +16,7 @@ namespace Contoso.Expenses.Function
             var reader = new StreamReader(request.Body);
             var input = await reader.ReadToEndAsync();
             input = input.Substring(1, input.Length - 2);
+            input = input.Replace("\\", String.Empty );
             Console.WriteLine($"Input: {input}");
             Expense expense = JsonSerializer.Deserialize<Expense>(input);
             var apiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
