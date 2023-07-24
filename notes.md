@@ -4,10 +4,9 @@ Create a Kubernetes cluster with a minimum of 3 nodes and ~8+GB per node (e.g., 
 
 Fork this repository (needed to enable CD) and clone it
 
-Install Nginx Ingress controller https://docs.microsoft.com/en-us/azure/aks/ingress-basic#create-an-ingress-controller
-Following commands from the first section of the referenced Docs Link is needed. 
+## Nginx Ingress controller Installation
 
-```
+```bash
 # Create a namespace for your ingress resources
 kubectl create namespace ingress-basic
 
@@ -17,56 +16,46 @@ helm repo update
 
 # Use Helm to deploy an NGINX ingress controller
 helm install nginx-ingress ingress-nginx/ingress-nginx \
-    --version 3.23.0 \
+    --version 4.7.1 \
     --namespace ingress-basic \
     --set controller.replicaCount=2 \
+    --set controller.electionID= ingress-controller-leader \
+    --set controller.ingressClassResource.name= nginx \
+    --set controller.ingressClassResource.enabled= true \
+    --set controller.ingressClassResource.default= true \
+    --set controller.ingressClassResource.controllerValue= k8s.io/nginx \
+    --set controller.ingressClass= nginx \
+    --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path= "/healthz" \
     --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
     --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux \
     --set controller.admissionWebhooks.patch.nodeSelector."beta\.kubernetes\.io/os"=linux
 ```
+
+Retrieve the public IP of the Loadbalancer service
+
+```bash
+kubectl get svc -n ingress-basic
+```
+
+Assign a DNS label to the Ingress Public IP and update it for the registryHost variable
+
 Set the variable to be used as the top level domain for this exercise. Use a custom domain or a cloud service provided domain name.
-```
-topLevelDomain=desiredhostnamename.com
-```
 
-If using AKS, a DNS name label can be assigend to the public IP of the Loadbalancer
- - Open the Public IP resource associated with the EXTERNAL-IP address of the LoadBalancer service
- - Navigate to the Configuration blade and set a unique name in the DNS name label
- - Use the FQDN. For ex. uniquename.centralus.cloudapp.azure.com
+If using AKS, a DNS name label can be assigned to the public IP of the Loadbalancer
 
-## Rook Installation
+- Open the Public IP resource associated with the EXTERNAL-IP address of the LoadBalancer service
+- Navigate to the Configuration blade and set a unique name in the DNS name label
+- Use the FQDN. For ex. {uniquename}.{region}.cloudapp.azure.com
 
-```
-kubectl apply -f yml/rook-common.yaml
-kubectl apply -f yml/rook-operator.yaml
-kubectl apply -f yml/rook-cluster.yaml
-kubectl apply -f yml/rook-storageclass.yaml
+```bash
+topLevelDomain={FQDN DNS label Name to be updated here}
 ```
 
-## Harbor Installation
+## Cert Manager Installation
 
-Install Ingress for Harbor.
-```
-# Create namespace for the harbor nginx ingress controller 
-kubectl create namespace harbor-ingress-system
-
-# Install nginx ingress for Harbor
-helm install harbor-nginx-ingress ingress-nginx/ingress-nginx \
-    --version 3.23.0 \
-    --namespace harbor-ingress-system \
-    --set controller.ingressClass=harbor-nginx \
-    --set controller.replicaCount=2 \
-    --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
-    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
-
-# Label the harbor-ingress-system namespace to disable cert resource validation
-kubectl label namespace harbor-ingress-system cert-manager.io/disable-validation=true
-```
-
-Install Cert Manager
-```
-# Label the ingress-basic namespace to disable resource validation
-kubectl label namespace ingress-basic cert-manager.io/disable-validation=true
+```bash
+# Create namespace for cert manager
+kubectl create namespace cert-manager cert-manager.io/disable-validation=true
 
 # Add the Jetstack Helm repository
 helm repo add jetstack https://charts.jetstack.io
@@ -75,15 +64,15 @@ helm repo update
 # Install the cert-manager Helm chart
 helm install cert-manager jetstack/cert-manager\
   --namespace ingress-basic \
-  --version v0.16.1 \
+  --version v1.12.1 \
   --set installCRDs=true \
   --set nodeSelector."beta\.kubernetes\.io/os"=linux
-  
 ```
 
-Create the ClusterIssuer by applying the below YAML with the email address changed
+Create the ClusterIssuer by applying the below YAML with the ***email address*** changed
 
-```
+```bash
+
 cat <<EOF | kubectl create -f -
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -99,7 +88,7 @@ spec:
     solvers:
     - http01:
         ingress:
-          class: harbor-nginx
+          class: nginx
           podTemplate:
             spec:
               nodeSelector:
@@ -107,19 +96,66 @@ spec:
 EOF
 ```
 
-Retrieve the public IP of the Loadbalancer service
+## Rook Installation
+
+```bash
+# Create a namespace for rook
+kubectl create namespace rook-ceph
+
+# Add the rook helm repo
+helm repo add rook-release https://charts.rook.io/release
+helm repo update
+
+# Use Helm to deploy an rook
+helm install rook-ceph rook-release/rook-ceph \
+    --version 1.11.9 \
+    --namespace rook-ceph \
+    --value yml/rook-values.yaml     
 ```
+
+## Harbor Installation
+
+Install Ingress for Harbor.
+
+```bash
+# Create namespace for the harbor nginx ingress controller 
+kubectl create namespace harbor-ingress-system
+
+# Install nginx ingress for Harbor
+helm install harbor-nginx-ingress ingress-nginx/ingress-nginx \
+    --version 4.7.1 \
+    --namespace harbor-ingress-system \
+    --set controller.replicaCount=2 \
+    --set controller.electionID= harbor-ingress-controller-leader \
+    --set controller.ingressClassResource.name= harbor \
+    --set controller.ingressClassResource.enabled= true \
+    --set controller.ingressClassResource.default= true \
+    --set controller.ingressClassResource.controllerValue= k8s.io/harbor \
+    --set controller.ingressClass= harbor \
+    --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path= "/healthz" \
+    --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
+    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux \
+    --set controller.admissionWebhooks.patch.nodeSelector."beta\.kubernetes\.io/os"=linux
+
+# Label the harbor-ingress-system namespace to disable cert resource validation
+kubectl label namespace harbor-ingress-system cert-manager.io/disable-validation=true
+```
+
+Retrieve the public IP of the Loadbalancer service
+
+```bash
 kubectl get svc -n harbor-ingress-system
 ```
 
 Assign a DNS label to the Ingress Public IP and update it for the registryHost variable
 
-If using AKS, a DNS name label can be assigend to the public IP of the Loadbalancer created in the harbor-ingress-system namespace.
- - Open the Public IP resource associated with the EXTERNAL-IP address of the LoadBalancer service for harbor ingress
- - Navigate to the Configuration blade and set a unique name in the DNS name label
- - Use the FQDN. For ex. uniquenameforharboringress.centralus.cloudapp.azure.com
+If using AKS, a DNS name label can be assigned to the public IP of the Loadbalancer created in the harbor-ingress-system namespace.
 
-```
+- Open the Public IP resource associated with the EXTERNAL-IP address of the LoadBalancer service for harbor ingress
+- Navigate to the Configuration blade and set a unique name in the DNS name label
+- Use the FQDN. For ex. {uniquenameforharboringress}.{region}.cloudapp.azure.com
+
+```bash
 registryHost={FQDN DNS label Name to be updated here}
 externalUrl=https://$registryHost
 
@@ -131,29 +167,31 @@ helm repo update
 
 # Install Harbor
 helm install harbor harbor/harbor \
-	--namespace harbor-system \
-	--version 1.6.0 \
-	--set expose.ingress.hosts.core=$registryHost \
-	--set expose.tls.secretName=ingress-cert-harbor \
-	--set notary.enabled=false \
-	--set trivy.enabled=false \
-	--set expose.ingress.annotations."kubernetes\.io/ingress\.class"=harbor-nginx \
-	--set expose.ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt  \
-	--set persistence.enabled=true \
-	--set externalURL=$externalUrl \
-	--set harborAdminPassword=admin \
-	--set persistence.persistentVolumeClaim.registry.storageClass=rook-ceph-block \
-	--set persistence.persistentVolumeClaim.chartmuseum.storageClass=rook-ceph-block \
-	--set persistence.persistentVolumeClaim.jobservice.storageClass=rook-ceph-block \
-	--set persistence.persistentVolumeClaim.database.storageClass=rook-ceph-block \
-	--set persistence.persistentVolumeClaim.redis.storageClass=rook-ceph-block 
+    --namespace harbor-system \
+    --version 1.12.2 \
+    --set expose.tls.certSource= secret \
+    --set expose.tls.secretName=ingress-cert-harbor \
+    --set expose.ingress.hosts.core=$registryHost \
+    --set expose.ingress.annotations."kubernetes\.io/ingress\.class"=harbor \
+    --set expose.ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt  \
+    --set expose.ingress.annotations."ingress\.kubernetes\.io/ssl-redirect"= "true" \
+    --set expose.ingress.annotations."acme\.cert-manager\.io/http01-ingress-class"=harbor \
+    --set expose.ingress.className=harbor \
+    --set notary.enabled=false \
+    --set trivy.enabled=false \
+    --set externalURL=$externalUrl \
+    --set harborAdminPassword=admin \
+    -set persistence.enabled=true \
+    --set persistence.persistentVolumeClaim.registry.storageClass=rook-ceph-block \
+    --set persistence.persistentVolumeClaim.chartmuseum.storageClass=rook-ceph-block \
+    --set persistence.persistentVolumeClaim.jobservice.storageClass=rook-ceph-block \
+    --set persistence.persistentVolumeClaim.database.storageClass=rook-ceph-block \
+    --set persistence.persistentVolumeClaim.redis.storageClass=rook-ceph-block 
 
 ```
-Patch the database stateful for the Harbor database so it will not error on pod restarts
-```
-kubectl patch statefulset harbor-harbor-database -n harbor-system --patch "$(cat yml/harbor-init-patch.yaml)"
-```
-Confirm harber installed and running then create the harbor project and user
+
+Confirm harbor installed and running then create the harbor project and user
+
 ```bash
 #Create conexp project in Harbor
  curl -u admin:admin -i -k -X POST "$externalUrl/api/v2.0/projects" \
@@ -174,11 +212,14 @@ echo "project_id: $conexpid"
       -d "@json/harbor-project-member.json" \
       -H "Content-Type: application/json"
 ```
+
 Now retrieve the Harbor Registry URL:
-```bash 
+
+```bash
 echo $externalUrl
 ```
-Use the following credentials to login:\
+
+Use the following credentials to login:
 admin\
 admin
 
@@ -186,22 +227,23 @@ admin
 
 Deploy Mysql
 
-```
+```bash
 kubectl create ns mysql
 
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 
 helm install mysql bitnami/mysql \
-	--namespace mysql \
-	--version 8.5.1 \
-	--set auth.rootPassword=FTA@CNCF0n@zure3 \
-	--set auth.username=ftacncf  \
-	--set auth.password=FTA@CNCF0n@zure3 \
-	--set global.storageClass=rook-ceph-block 
+    --namespace mysql \
+    --version 9.10.5 \
+    --set auth.rootPassword=FTA@CNCF0n@zure3 \
+    --set auth.username=ftacncf  \
+    --set auth.password=FTA@CNCF0n@zure3 \
+    --set global.storageClass=rook-ceph-block 
 ```
 
-Create the databases 
+Create the databases
+
 ```bash
 kubectl run -n mysql -i -t ubuntu --image=ubuntu:18.04 --restart=Never -- bash -il
 apt-get update && apt-get install mysql-client -y
@@ -238,40 +280,50 @@ exit;
 exit;
 ```
 
-## OpenFaaS
+## Knative Installation
+
+```bash
+# Install the Knative Serving component
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.10.2/serving-crds.yaml
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.10.2/serving-core.yaml
+
+# Install a networking layer
+kubectl apply -f https://github.com/knative/net-kourier/releases/download/knative-v1.10.0/kourier.yaml
+
+# Configure Kourier Networking
+kubectl patch configmap/config-network \
+  --namespace knative-serving \
+  --type merge \
+  --patch '{"data":{"ingress-class":"kourier.ingress.networking.knative.dev"}}'
+
+# Configure the No DNS
+kubectl patch configmap/config-domain \
+      --namespace knative-serving \
+      --type merge \
+      --patch '{"data":{"example.com":""}}'
+
+# Install Eventing
+kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.10.1/eventing-crds.yaml
+kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.10.1/eventing-core.yaml
+
+# Install Channel and Broker
+kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.10.1/in-memory-channel.yaml
+kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.10.1/mt-channel-broker.yaml
 
 ```
-helm repo add openfaas https://openfaas.github.io/faas-netes/
-helm repo update
 
-kubectl apply -f https://raw.githubusercontent.com/openfaas/faas-netes/master/namespaces.yml
+## Prometheus Installation
 
-kubectl -n openfaas create secret generic basic-auth --from-literal=basic-auth-user=admin --from-literal=basic-auth-password="FTA@CNCF0n@zure3"
-
-helm install openfaas openfaas/openfaas -f yml/openfaas-values.yaml -n openfaas
-```
-
-```
-kubectl port-forward deploy/gateway 8080:8080 -n openfaas
-
-Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
-```
-
-Install the Nats Connector
-```
-kubectl apply -f yml/openfaas-nats-connector.yaml
-```
-## Prometheus
-
-```
+```bash
 kubectl create ns monitoring
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 helm install prometheus prometheus-community/kube-prometheus-stack -f yml/prometheus-values.yaml  \
   -n monitoring \
-  --version 13.13.0
+  --version 47.3.0
 ```
-```
+
+```bash
 kubectl port-forward deploy/prometheus-grafana 8070:3000 -n monitoring
 Browse to http://localhost:8070 and use the username/password as admin/FTA@CNCF0n@zure3
 
@@ -279,36 +331,38 @@ kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n moni
 Browse to http://localhost:9090
 ```
 
-## Jaeger
+## Jaeger Installation
 
-```
+```bash
 helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
 helm repo update
 
 kubectl create ns tracing
 helm install jaeger jaegertracing/jaeger -f yml/jaeger-values.yaml \
   -n tracing \
-  --version 0.40.1
+  --version 0.71.8
 ```
-```
+
+```bash
 # Wait for at least ~5 minutes before browsing to the Jaeger UI
 kubectl port-forward svc/jaeger-query 8060:80 -n tracing
 Browse to http://localhost:8060
 ```
 
-## Linkerd
+## Linkerd Installation
 
 Deploy Linkered
-```
+
+```bash
 # Install cli
-curl -sL https://run.linkerd.io/install | sed s/LINKERD2_VERSION=.\*/LINKERD2_VERSION=${LINKERD2_VERSION:-stable-2.10.0}/ | sh
+curl --tlsv1.2 -sSfL https://run.linkerd.io/install | sed s/LINKERD2_VERSION=.\*/LINKERD2_VERSION=${LINKERD2_VERSION:-stable-2.13.5}/ | sh
 export PATH=$PATH:$HOME/.linkerd2/bin
 linkerd version
 linkerd check --pre
 
 # Generate certificates.
-wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
-sudo dpkg -i step-cli_0.15.2_amd64.deb
+wget https://github.com/smallstep/cli/releases/download/v0.23.4/step-cli_0.23.4_amd64.deb
+sudo dpkg -i step-cli_0.23.4_amd64.deb
 
 step certificate create identity.linkerd.cluster.local ca.crt ca.key --profile root-ca --no-password --insecure
 step certificate create identity.linkerd.cluster.local issuer.crt issuer.key --ca ca.crt --ca-key ca.key --profile intermediate-ca --not-after 8760h --no-password --insecure
@@ -320,18 +374,21 @@ linkerd install --identity-trust-anchors-file ca.crt --identity-issuer-certifica
 linkerd viz install | kubectl apply -f -
 ```
 
-Integrate Openfaas with Linkerd (need to wait for Linker do to come up)
-```
-kubectl -n openfaas get deploy gateway -o yaml | linkerd inject --skip-outbound-ports=4222 - | kubectl apply -f -
+Integrate Knative with Linkerd (need to wait for Linker do to come up)
+
+```bash
+#TODO - Linkerd/Jaeger injection 
 ```
 
 Integrate Nginx Ingress controller with Linkerd
-```
+
+```bash
 kubectl get deploy/nginx-ingress-ingress-nginx-controller -n ingress-basic -o yaml | linkerd inject - | kubectl apply -f - 
 ```
 
 Linkerd metrics integration with Prometheus
-```
+
+```bash
 kubectl create secret generic prometheus-kube-prometheus-prometheus-scrape-confg-linkerd --from-file=additional-scrape-configs.yaml=yml/linkerd-prometheus-additional.yaml -n monitoring
 
 kubectl get prometheus prometheus-kube-prometheus-prometheus -n monitoring -o yaml | sed s/prometheus-kube-prometheus-prometheus-scrape-confg/prometheus-kube-prometheus-prometheus-scrape-confg-linkerd/ | kubectl apply -f -
@@ -339,69 +396,96 @@ kubectl get prometheus prometheus-kube-prometheus-prometheus -n monitoring -o ya
 ```
 
 Linkerd integration with Jaeger
-```
+
+```bash
 linkerd jaeger install --set collector.jaegerAddr='http://jaeger-collector.tracing:14268/api/traces' | kubectl apply -f -
 
-kubectl annotate namespace openfaas-fn config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
-kubectl annotate namespace openfaas config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
 kubectl annotate namespace ingress-basic config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
 ```
 
 Open the dashboard in browser (linkerd-viz may take up to ~12 minutes to start)
-```
+
+```bash
 linkerd viz dashboard
 ```
 
-## Tekton
-Install Tekton pipelines
-```
-kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.21.0/release.yaml
+## Tekton Installation
+
+```bash
+# Install Tekton pipelines
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.49.0/release.yaml
 
 kubectl apply -f yml/tekton-default-configmap.yaml  -n  tekton-pipelines
-kubectl apply -f yml/tekton-pvc-configmap.yaml -n  tekton-pipelines
 kubectl apply -f yml/tekton-feature-flags-configmap.yaml -n  tekton-pipelines
-```
-Install Tekton Triggers
-```
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/previous/v0.13.0/release.yaml
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/previous/v0.13.0/interceptors.yaml
-```
-Install Tekton Dashboard
-```
-kubectl apply --filename https://github.com/tektoncd/dashboard/releases/download/v0.14.0/tekton-dashboard-release.yaml
-```
-```
+
+# Install Tekton Triggers
+
+kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/previous/v0.24.0/release.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/previous/v0.24.0/interceptors.yaml
+
+# Install Tekton Dashboard
+
+kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/previous/v0.37.0/release.yaml
+
 kubectl port-forward svc/tekton-dashboard 8080:9097  -n tekton-pipelines
-Browse to http://localhost:8080
 ```
 
-## App Installation
+Browse to http://localhost:8080
+
+## Prepare for App Installation
 
 Create a namespace for app deployment and annotate it for linkerd and jaeger operations
-```
+
+```bash
 kubectl create ns conexp-mvp
 kubectl annotate namespace conexp-mvp linkerd.io/inject=enabled
 kubectl annotate namespace conexp-mvp config.linkerd.io/skip-outbound-ports="4222"
 kubectl annotate namespace conexp-mvp config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
+
+# Create namespace for function deployment by knative
+kubectl create ns conexp-mvp-fn
+#TODO - Linkerd/Jaeger injection    
 ```
 
 Create the registry credentials in the deployment namespaces
-```
+
+```bash
 kubectl create secret docker-registry regcred --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp
-kubectl create secret docker-registry regcred --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn
+kubectl create secret docker-registry regcred --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp-fn
 ```
 
-## Tekton - App Deployment
+## Tekton - App Pipelines Deployment
 
-```
+```bash
 kubectl create ns conexp-mvp-devops
 kubectl apply -f yml/tekton-limit-range.yaml
 
 kubectl apply -f yml/app-admin-role.yaml -n conexp-mvp-devops
 ```
 
-Update secret (basic-user-pass) for registry credentails, TriggerBinding for registry name, and namespaces in triggers.yaml. Create a SendGrid Account and set an API key for use. Reference this [link](https://sendgrid.com/) to create a free SendGrid account and get the SendGrid API key.
+Create the docker secret for tekton pipelines to push images to the registry
+
+```bash
+CONFIG="\
+{\n
+    \"auths\": {\n
+        \"${registryHost}\": {\n
+            \"username\": \"conexp\",\n
+            \"password\": \"FTA@CNCF0n@zure3\",\n
+            \"email\": \"user@mycompany.com\",\n
+            \"auth\": \"Y29uZXhwOkZUQUBDTkNGMG5AenVyZTM=\"\n
+        }\n
+    }\n
+}\n"
+
+printf "${CONFIG}" > config.json
+kubectl create secret generic regcred --from-file=config.json=config.json -n conexp-mvp-devops
+
 ```
+
+Update TriggerBinding for registry name in app-triggers.yaml. Create a SendGrid Account and set an API key for use. Reference this [link](https://sendgrid.com/) to create a free SendGrid account and get the SendGrid API key.
+
+```bash
 sendGridApiKey=<<set the api key>>
 appHostName=$topLevelDomain
 
@@ -415,13 +499,17 @@ kubectl apply -f yml/app-triggers.yaml -n conexp-mvp-devops
 ```
 
 Roles and bindings in the deployment namespace
-```
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/main/task/kaniko/0.6/kaniko.yaml -n conexp-mvp-devops
+kubectl apply -f yml/git-clone-task.yaml -n conexp-mvp-devops
 kubectl apply -f yml/app-deploy-rolebinding.yaml -n conexp-mvp
-kubectl apply -f yml/app-deploy-rolebinding.yaml -n openfaas-fn
+kubectl apply -f yml/app-deploy-rolebinding.yaml -n conexp-mvp-fn
 ```
 
 Expose the Tekton Event Listener externally through an Ingress for Github to dispatch the push events
-```
+
+```bash
 cicdWebhookHost=$topLevelDomain
 
 sed -i "s/{cicdWebhook}/$cicdWebhookHost/g" yml/tekton-el-ingress.yaml
@@ -438,6 +526,6 @@ Make a change to the readme.md file and observe the deployment in Tekton dashboa
 
 ## Launch the Application
 
-Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example **uniquename.centralus.cloudapp.azure.com**.
+Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example **{uniquename}.{region}.cloudapp.azure.com**.
 
-This will launch the application and you can proceed to create, update, delete expenses. 
+This will launch the application and you can proceed to create, update, delete expenses.
