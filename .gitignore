@@ -4,3 +4,4 @@ gitops/cluster/production/flux-system
 gitops/infrastructure/linkerd/*.crt
 gitops/infrastructure/linkerd/*.key
 *.deb
+*.tar.gz
