@@ -7,6 +7,7 @@
 - Create a [PAT token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the repo (check the repo box as scope)
 - Clone the fork to workstation
 
+Note: Start at the root of the directory in the repo
 ## Option 1
 
 ### Script Install
@@ -26,7 +27,7 @@ export cluster_issuer_email="<<EMAIL>>"
 export sendGridApiKey="<<set the api key>>"
 
 
-. ./cloud-native-app/gitops/setup.sh
+. ./gitops/setup.sh
 
 ```
 The cluster components will take around 12 minutes to deploy. You can check the status (all should read True) with the below command
@@ -34,46 +35,6 @@ The cluster components will take around 12 minutes to deploy. You can check the 
 ```bash
 kubectl get Kustomizations -A
 ```
-
-### Urls for the components
-
-```bash
-# Tekton
-kubectl port-forward svc/tekton-dashboard 8080:9097  -n tekton-pipelines
-Browse to http://localhost:8080
-
-# Linkerd
-kubectl port-forward svc/web 8084:8084  -n linkerd-viz
-Browse to http://localhost:8084
-
-#Jaeger
-kubectl port-forward svc/jaeger-query 8060:80 -n tracing
-Browse to http://localhost:8060
-
-# Grafana
-kubectl port-forward deploy/prometheus-grafana 8070:3000 -n monitoring
-Browse to http://localhost:8070 and use the username/password as admin/FTA@CNCF0n@zure3
-
-# Prometheus
-kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring 
-Browse to http://localhost:9090
-
-# Openfaas
-kubectl port-forward deploy/gateway 8080:8080 -n openfaas
-Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
-
-# Harbor Url
-echo $registryHost
-
-# App Url
-echo $appHostName
-
-```
-
-Invoke the CICD pipeline by making a small edit to the read.me file in Github. Observe the deployment in Tekton Dashboard. The app deployment should take around 5 minutes.
-
-Navigate to the appHost in the browser to test the app.
-
 ## Option 2
 
 Alternatively, use the instructions below
@@ -89,7 +50,8 @@ curl -s https://fluxcd.io/install.sh | sudo bash
 ### Install Kube-Seal
 
 ```bash
-wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.16.0/kubeseal-linux-amd64 -O kubeseal
+sudo wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.22.0/kubeseal-0.22.0-linux-amd64.tar.gz -O kubeseal.tar.gz
+tar -xvzf kubeseal.tar.gz kubeseal && rm kubeseal.tar.gz
 sudo install -m 755 kubeseal /usr/local/bin/kubeseal && rm kubeseal
 ```
 
@@ -116,10 +78,10 @@ flux bootstrap github \
 
 ```bash
 
-wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
-sudo dpkg -i step-cli_0.15.2_amd64.deb
+wget https://github.com/smallstep/cli/releases/download/v0.23.4/step-cli_0.23.4_amd64.deb
+sudo dpkg -i step-cli_0.23.4_amd64.deb
 
-cd cloud-native-app/gitops/infrastructure/linkerd
+cd gitops/infrastructure/linkerd
 
 step certificate create identity.linkerd.cluster.local ca.crt ca.key \
 --profile root-ca --no-password --insecure \
@@ -139,11 +101,11 @@ kubectl rollout status deployment sealed-secrets-controller -n flux-system
 kubeseal --fetch-cert \
 --controller-name=sealed-secrets-controller \
 --controller-namespace=flux-system \
-> ../../../../pub-sealed-secrets.pem
+> ../../../pub-sealed-secrets.pem
 
-kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
 < certs.yaml > certs-sealed.yaml
-rm certs.yaml
+rm certs.yaml ca.crt issuer.crt issuer.key ca.key
 
 cd ../../..
 
@@ -180,7 +142,7 @@ kubectl create secret generic gitops-variables --from-literal=registryHost=$regi
 	-n flux-system -oyaml --dry-run=client \
 	> gitops-variables.yaml
   
-kubeseal --format=yaml --cert=../pub-sealed-secrets.pem \
+kubeseal --format=yaml --cert=pub-sealed-secrets.pem \
 < gitops-variables.yaml > gitops-variables-sealed.yaml  
 
 rm gitops-variables.yaml
@@ -195,20 +157,45 @@ kubectl create secret docker-registry regcred \
 --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp -oyaml --dry-run=client \
 > regcred-conexp.yaml
 
-kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
+kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
 < regcred-conexp.yaml > regcred-conexp-sealed.yaml
 rm regcred-conexp.yaml
 
 kubectl create secret docker-registry regcred \
---docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn -oyaml --dry-run=client \
-> regcred-openfaas.yaml
+--docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp-fn -oyaml --dry-run=client \
+> regcred-fn.yaml
 
-kubeseal --format=yaml --cert=../../../../pub-sealed-secrets.pem \
-< regcred-openfaas.yaml > regcred-openfaas-sealed.yaml
-rm regcred-openfaas.yaml
+kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
+< regcred-fn.yaml > regcred-fn-sealed.yaml
+rm regcred-fn.yaml
 
 cd ../../..
 
+cd gitops/app/devops
+
+CONFIG="\
+{\n
+    \"auths\": {\n
+        \"${registryHost}\": {\n
+            \"username\": \"conexp\",\n
+            \"password\": \"FTA@CNCF0n@zure3\",\n
+            \"email\": \"user@mycompany.com\",\n
+            \"auth\": \"Y29uZXhwOkZUQUBDTkNGMG5AenVyZTM=\"\n
+        }\n
+    }\n
+}\n"
+
+printf "${CONFIG}" > config.json
+kubectl create secret generic regcred --from-file=config.json=config.json -n conexp-mvp-devops  -oyaml --dry-run=client  > regcred-devops.yaml
+rm config.json
+
+kubeseal --format=yaml --cert=../../../pub-sealed-secrets.pem \
+< regcred-devops.yaml > regcred-devops-sealed.yaml
+rm regcred-devops.yaml
+
+cd ../../..
+
+rm step-cli_0.23.4_amd64.deb pub-sealed-secrets.pem
 ```
 
 Commit the Repo
@@ -238,4 +225,43 @@ curl -H "Authorization: token $GITHUB_TOKEN" \
   -d "{\"config\":{\"url\":\"https://$appHostName/cd\",\"content_type\":\"json\"}}"
 ```
 
-Test Stub #2
+## Urls for the components
+
+```bash
+# Flux UI
+kubectl port-forward svc/weave-gitops 9001:9001  -n flux-system
+Browse to http://localhost:9001 and use the username/password as admin/flux
+
+# Tekton
+kubectl port-forward svc/tekton-dashboard 8080:9097  -n tekton-pipelines
+Browse to http://localhost:8080
+
+# Linkerd
+kubectl port-forward svc/web 8084:8084  -n linkerd-viz
+Browse to http://localhost:8084
+
+#Jaeger
+kubectl port-forward svc/jaeger-query 8060:80 -n tracing
+Browse to http://localhost:8060
+
+# Grafana
+kubectl port-forward deploy/prometheus-grafana 8070:3000 -n monitoring
+Browse to http://localhost:8070 and use the username/password as admin/FTA@CNCF0n@zure3
+
+# Prometheus
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring 
+Browse to http://localhost:9090
+
+# Harbor Url
+echo $registryHost
+
+# App Url
+echo $appHostName
+
+```
+
+Invoke the CICD pipeline by making a small edit to the read.me file in Github. Observe the deployment in Tekton Dashboard. The app deployment should take around 5 minutes.
+
+Navigate to the appHost in the browser to test the app.
+
+Test Stub #1

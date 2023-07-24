@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: ingress-nginx
-      version: '3.23.0'
+      version: '4.7.1'
       sourceRef:
         kind: HelmRepository
         name: ingress-nginx
@@ -23,20 +23,33 @@ spec:
   values:
     controller:
       replicaCount: 2
+      electionID: ingress-controller-leader
+      ingressClassResource:
+        name: nginx
+        enabled: true
+        default: true
+        controllerValue: k8s.io/nginx
+      ingressClass: nginx
+      pod:
+        annotations:
+          linkerd.io/inject: enabled
+          config.linkerd.io/trace-collector: collector.linkerd-jaeger:55678
       service:
         annotations:
           service.beta.kubernetes.io/azure-dns-label-name: "${appHostDnsLabel}" 
+          service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/healthz"
       nodeSelector:
         beta.kubernetes.io/os: linux
     defaultBackend:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux     
   postRenderers:
     - kustomize:
         patchesStrategicMerge:
           - kind: Deployment
             apiVersion: apps/v1
             metadata:
-              name: nginx-ingress-ingress-nginx-controller 
+              name: nginx-ingress-ingress-nginx-controller
+              namespace: ingress-basic 
               annotations:
-                linkerd.io/inject: enabled      
+                linkerd.io/inject: enabled         

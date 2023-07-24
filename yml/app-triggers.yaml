@@ -22,50 +22,48 @@ spec:
     - name: fn-deployment-namespace
       description: The namespace to deploy the yaml      
   resourcetemplates:
-    - apiVersion: tekton.dev/v1alpha1
+    - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
         name: conexp-pipeline-run-$(uid)
         namespace: $(tt.params.namespace)
       spec:
-        serviceAccountName: deployment-user
+        serviceAccountName: deployment-user           
         pipelineRef:
           name: conexp-pipeline
         podTemplate:
           nodeSelector:
-            kubernetes.io/os: linux         
+            kubernetes.io/os: linux
+          securityContext:
+            fsGroup: 65532                     
         params:
           - name: deployment-namespace
             value: $(tt.params.deployment-namespace)
           - name: fn-deployment-namespace
-            value: $(tt.params.fn-deployment-namespace)            
-        resources:
-          - name: source-repo
-            resourceSpec:
-              type: git
-              params:
-              - name: revision
-                value: $(tt.params.gitrevision)
-              - name: url
-                value: $(tt.params.gitrepositoryurl)
+            value: $(tt.params.fn-deployment-namespace)           
+          - name: git-revision
+            value: $(tt.params.gitrevision)
+          - name: git-url
+            value: $(tt.params.gitrepositoryurl)  
           - name: web-image-source
-            resourceSpec:
-              type: image
-              params:
-                - name: url
-                  value: $(tt.params.web-imageUrl)
+            value: $(tt.params.web-imageUrl)      
           - name: api-image-source
-            resourceSpec:
-              type: image
-              params:
-                - name: url
-                  value: $(tt.params.api-imageUrl)
+            value: $(tt.params.api-imageUrl) 
           - name: fn-image-source
-            resourceSpec:
-              type: image
-              params:
-                - name: url
-                  value: $(tt.params.fn-imageUrl)                  
+            value: $(tt.params.fn-imageUrl)                                
+        workspaces:
+        - name: shared-data
+          volumeClaimTemplate:
+            spec:
+              storageClassName: rook-ceph-block
+              accessModes:
+              - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi    
+        - name: docker-credentials
+          secret:
+            secretName: regcred                                                     
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
@@ -80,7 +78,7 @@ spec:
     - name: deployment-namespace
       value: conexp-mvp
     - name: fn-deployment-namespace
-      value: openfaas-fn      
+      value: conexp-mvp-fn      
     - name: gitrepositoryurl
       value: "https://github.com/$(body.repository.full_name)"
     - name: web-imageUrl
@@ -104,31 +102,42 @@ spec:
         ref: conexp-triggertemplate        
 ---
 apiVersion: v1
-kind: Secret
-metadata:
-  name: docker-basic-user-pass
-  annotations:
-    tekton.dev/docker-0: http://{registryHost}
-type: kubernetes.io/basic-auth
-stringData:
-  username: conexp
-  password: FTA@CNCF0n@zure3
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: deployment-user
 secrets:
-  - name: docker-basic-user-pass
+  - name: regcred
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pipeline-role
 rules:
-- apiGroups: ["", "extensions", "apps"]
+- apiGroups: ["", "extensions", "apps", "serving.knative.dev", "eventing.knative.dev"]
   resources: ["*"]
   verbs: ["*"]
+---  
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pipeline-cluster-role
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pipeline-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pipeline-cluster-role
+subjects:
+- kind: ServiceAccount
+  name: deployment-user
+  namespace: conexp-mvp-devops
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
