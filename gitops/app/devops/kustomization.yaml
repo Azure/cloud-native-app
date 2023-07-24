@@ -8,6 +8,9 @@ resources:
   - ../../../yml/app-triggers.yaml
   - ../../../yml/app-pipeline.yaml
   - ../../../yml/tekton-el-ingress.yaml
+  - ../../../yml/git-clone.yaml
+  - https://raw.githubusercontent.com/tektoncd/catalog/main/task/kaniko/0.6/kaniko.yaml 
+  - regcred-devops-sealed.yaml
 patches: 
   - patch: |-
       - op: replace
@@ -27,21 +30,13 @@ patches:
         value:
           - "-i"
           - "-e"
-          - "s|__IMAGE__|$(inputs.resources.image-source.url)|g;s|__SENDGRIDAPIKEY__|${sendGridApiKey}|g;s|__APPHOSTNAME__|${appHostName}|g;s|__APIDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpapi;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__WEBDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpweb;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__APIURL__|http://backend-svc.conexp-mvp.svc.cluster.local:80|g;"
-          - "/workspace/source-repo/src/$(inputs.params.pathToYamlFile)"                              
+          - "s|__IMAGE__|$(params.image-source)|g;s|__SENDGRIDAPIKEY__|${sendGridApiKey}|g;s|__APPHOSTNAME__|${appHostName}|g;s|__APIDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpapi;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__WEBDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpweb;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__APIURL__|http://backend-svc.conexp-mvp.svc.cluster.local:80|g;"
+          - "$(workspaces.source.path)/src/$(params.pathToYamlFile)"                              
     target:
       group: tekton.dev
       version: v1beta1
       kind: Task
       name: deploy-using-kubectl
-  - patch: |-
-      - op: replace
-        path: /metadata/annotations/tekton.dev~1docker-0
-        value: "https://${registryHost}"                        
-    target:
-      version: v1
-      kind: Secret
-      name: docker-basic-user-pass
   - patch: |-
       - op: replace
         path: /spec/params/5
@@ -62,4 +57,4 @@ patches:
       group: triggers.tekton.dev
       version: v1alpha1
       kind: TriggerBinding    
-      name: conexp-pipelinebinding     
+      name: conexp-pipelinebinding   

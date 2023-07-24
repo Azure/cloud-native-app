@@ -33,7 +33,7 @@ spec:
       imagePullSecrets:
       - name: regcred
       nodeSelector: 
-        "beta.kubernetes.io/os": linux
+        "kubernetes.io/os": linux
 ---
 apiVersion: v1
 kind: Service
@@ -50,7 +50,7 @@ spec:
     port: 80
     targetPort: 80
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: frontend-ingress-rules
@@ -62,11 +62,15 @@ metadata:
       proxy_hide_header l5d-remote-ip;
       proxy_hide_header l5d-server-id;
 spec:
+  ingressClassName: nginx
   rules:
   - host: __APPHOSTNAME__
     http:
       paths:
       - backend:
-          serviceName: conexp-frontend-svc
-          servicePort: 80
+          service:
+            name: conexp-frontend-svc
+            port:
+              number: 80
         path: /(.*)
+        pathType: Prefix

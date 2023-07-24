@@ -1,14 +1,35 @@
-apiVersion: openfaas.com/v1
-kind: Function
+apiVersion: serving.knative.dev/v1
+kind: Service
 metadata:
   name: expenseemailsender
+  namespace: conexp-mvp-fn
+  labels:
+    networking.knative.dev/visibility: cluster-local
 spec:
+  template:
+    spec:
+      imagePullSecrets:
+      - name: regcred  
+      containers:
+      - image: __IMAGE__
+        ports:
+        - containerPort: 80
+        env:
+        - name: SENDGRID_API_KEY
+          value: "__SENDGRIDAPIKEY__"
+---
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
   name: expenseemailsender
-  annotations:
-    topic: "nats-email"
-  image: __IMAGE__
-  environment:
-    write_debug: "true"
-    SENDGRID_API_KEY: "__SENDGRIDAPIKEY__"
-  secrets:
-      - regcred
+  namespace: conexp-mvp-fn
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: contoso.web.dispatchemail
+  subscriber:
+    ref:
+     apiVersion: serving.knative.dev/v1
+     kind: Service
+     name: expenseemailsender          

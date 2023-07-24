@@ -3,15 +3,6 @@ kind: Pipeline
 metadata:
   name: conexp-pipeline
 spec:
-  resources:
-    - name: source-repo
-      type: git
-    - name: web-image-source
-      type: image
-    - name: api-image-source
-      type: image
-    - name: fn-image-source
-      type: image
   params:
     - name: deployment-namespace
       type: string
@@ -20,137 +11,122 @@ spec:
     - name: fn-deployment-namespace
       type: string
       description: namespace to deploy the function yaml
-      default: openfaas-fn      
+      default: conexp-mvp-fn      
+    - name: git-revision
+      type: string
+    - name: git-url
+      type: string   
+    - name: web-image-source
+      type: string
+    - name: api-image-source
+      type: string
+    - name: fn-image-source
+      type: string        
+  workspaces:
+  - name: shared-data 
+  - name: docker-credentials       
   tasks:
+    - name: fetch-source
+      taskRef:
+        name: git-clone
+      workspaces:
+      - name: output
+        workspace: shared-data
+      params:
+      - name: url
+        value: $(params.git-url) 
+      - name: revision
+        value: $(params.git-revision)       
     - name: build-docker-image-web
+      runAfter: ["fetch-source", "build-docker-image-fn"]
       taskRef:
-        name: build-docker-image
-      runAfter:
-        - build-docker-image-fn        
+        name: kaniko
+      workspaces:
+      - name: source
+        workspace: shared-data  
+      - name: dockerconfig
+        workspace: docker-credentials       
       params:
-        - name: pathToDockerFile
+        - name: DOCKERFILE
           value: Contoso.Expenses.Web/Dockerfile
-        - name: pathToContext
-          value: /workspace/source-repo/src
-      resources:
-        inputs:
-          - name: source-repo
-            resource: source-repo
-        outputs:
-          - name: image-source
-            resource: web-image-source
+        - name: CONTEXT
+          value: /src
+        - name: IMAGE
+          value: $(params.web-image-source)      
     - name: build-docker-image-api
+      runAfter: ["fetch-source", "build-docker-image-web"]
       taskRef:
-        name: build-docker-image
-      runAfter:
-        - build-docker-image-web
+        name: kaniko
+      workspaces:
+      - name: source
+        workspace: shared-data  
+      - name: dockerconfig
+        workspace: docker-credentials      
       params:
-        - name: pathToDockerFile
+        - name: DOCKERFILE
           value: Dockerfile
-        - name: pathToContext
-          value: /workspace/source-repo/src/Contoso.Expenses.API
-      resources:
-        inputs:
-          - name: source-repo
-            resource: source-repo
-        outputs:
-          - name: image-source
-            resource: api-image-source
+        - name: CONTEXT
+          value: /src/Contoso.Expenses.API
+        - name: IMAGE
+          value: $(params.api-image-source)        
     - name: build-docker-image-fn
+      runAfter: ["fetch-source"]
       taskRef:
-        name: build-docker-image
+        name: kaniko
+      workspaces:
+      - name: source
+        workspace: shared-data  
+      - name: dockerconfig
+        workspace: docker-credentials              
       params:
-        - name: pathToDockerFile
-          value: Contoso.Expenses.OpenFaaS/Dockerfile
-        - name: pathToContext
-          value: /workspace/source-repo/src
-      resources:
-        inputs:
-          - name: source-repo
-            resource: source-repo
-        outputs:
-          - name: image-source
-            resource: fn-image-source
+        - name: DOCKERFILE
+          value: Contoso.Expenses.Function/Dockerfile
+        - name: CONTEXT
+          value: /src
+        - name: IMAGE
+          value: $(params.fn-image-source)
     - name: deploy-using-kubectl-web
+      runAfter: ["build-docker-image-web"]
       taskRef:
         name: deploy-using-kubectl
+      workspaces:
+      - name: source
+        workspace: shared-data          
       params:
         - name: pathToYamlFile
           value: frontend.yaml
         - name: deployment-namespace
           value: $(params.deployment-namespace)
-      resources:
-        inputs:
-          - name: source-repo
-            resource: source-repo
-          - name: image-source
-            resource: web-image-source
-            from:
-              - build-docker-image-web
+        - name: image-source
+          value: $(params.web-image-source)            
     - name: deploy-using-kubectl-api
+      runAfter: ["build-docker-image-api"]
       taskRef:
         name: deploy-using-kubectl
+      workspaces:
+      - name: source
+        workspace: shared-data         
       params:
         - name: pathToYamlFile
           value: backend.yaml
         - name: deployment-namespace
           value: $(params.deployment-namespace)
-      resources:
-        inputs:
-          - name: source-repo
-            resource: source-repo
-          - name: image-source
-            resource: api-image-source
-            from:
-              - build-docker-image-api
+        - name: image-source
+          value: $(params.api-image-source)  
     - name: deploy-using-kubectl-fn
+      runAfter: ["build-docker-image-fn"]
       taskRef:
         name: deploy-using-kubectl
+      workspaces:
+      - name: source
+        workspace: shared-data         
       params:
         - name: pathToYamlFile
           value: function.yaml
         - name: deployment-namespace
           value: $(params.fn-deployment-namespace)
-      resources:
-        inputs:
-          - name: source-repo
-            resource: source-repo
-          - name: image-source
-            resource: fn-image-source
-            from:
-              - build-docker-image-fn            
----
-apiVersion: tekton.dev/v1beta1
-kind: Task
-metadata:
-  name: build-docker-image
-spec:
-  params:
-    - name: pathToDockerFile
-      description: Path to Dockerfile
-      default: /workspace/source-repo/src/Dockerfile
-    - name: pathToContext
-      description: The build context used by Kaniko
-      default: /workspace/source-repo/src
-  resources:
-    inputs:    
-      - name: source-repo
-        type: git
-    outputs:
-      - name: image-source
-        type: image
-  steps:
-    - name: build-and-push
-      image: gcr.io/kaniko-project/executor:v0.15.0
-      env:
-        - name: "DOCKER_CONFIG"
-          value: "/builder/home/.docker/"
-      command:
-        - /kaniko/executor
-      args:
-        - --dockerfile=$(inputs.params.pathToDockerFile)
-        - --destination=$(outputs.resources.image-source.url)
-        - --context=$(inputs.params.pathToContext)
+        - name: image-source
+          value: $(params.fn-image-source)                                      
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
@@ -162,12 +138,10 @@ spec:
       description: The path to the yaml file to deploy within the git source
     - name: deployment-namespace
       description: The namespace to deploy to
-  resources:
-    inputs:    
-      - name: source-repo
-        type: git
-      - name: image-source
-        type: image
+    - name: image-source
+      description: The path of the image      
+  workspaces:
+  - name: source
   steps:
     - name: update-yaml
       image: alpine
@@ -175,19 +149,19 @@ spec:
       args:
         - "-i"
         - "-e"
-        - "s|__IMAGE__|$(inputs.resources.image-source.url)|g;s|__SENDGRIDAPIKEY__|{SENDGRIDAPIKEYRELACE}|g;s|__APPHOSTNAME__|{APPHOSTNAMEREPLACE}|g;s|__APIDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpapi;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__WEBDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpweb;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__APIURL__|http://backend-svc.conexp-mvp.svc.cluster.local:80|g;"
-        - "/workspace/source-repo/src/$(inputs.params.pathToYamlFile)"
+        - "s|__IMAGE__|$(params.image-source)|g;s|__SENDGRIDAPIKEY__|{SENDGRIDAPIKEYRELACE}|g;s|__APPHOSTNAME__|{APPHOSTNAMEREPLACE}|g;s|__APIDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpapi;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__WEBDBCONSTR__|server=mysql.mysql.svc.cluster.local;Port=3306;database=conexpweb;user=ftacncf;password=FTA@CNCF0n@zure3;|g;s|__APIURL__|http://backend-svc.conexp-mvp.svc.cluster.local:80|g;"
+        - "$(workspaces.source.path)/src/$(params.pathToYamlFile)" 
     - name: print-yaml
       image: alpine
       command: ["cat"]
       args:
-        - "/workspace/source-repo/src/$(inputs.params.pathToYamlFile)"
+        - "$(workspaces.source.path)/src/$(params.pathToYamlFile)"
     - name: run-kubectl
       image: lachlanevenson/k8s-kubectl
       command: ["kubectl"]
       args:
         - "apply"
         - "-f"
-        - "/workspace/source-repo/src/$(inputs.params.pathToYamlFile)"
+        - "$(workspaces.source.path)/src/$(params.pathToYamlFile)"
         - "-n"
-        - "$(inputs.params.deployment-namespace)"
+        - "$(params.deployment-namespace)"

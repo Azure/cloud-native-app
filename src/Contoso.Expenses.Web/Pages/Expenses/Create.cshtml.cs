@@ -1,17 +1,20 @@
 ﻿using App.Metrics;
+using CloudNative.CloudEvents;
+using CloudNative.CloudEvents.Http;
+using CloudNative.CloudEvents.NewtonsoftJson;
 using Contoso.Expenses.Common.Models;
 using Contoso.Expenses.Web.AppMetrics;
 using Contoso.Expenses.Web.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using NATS.Client;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
+using System.Net.Mime;
 using System.Threading.Tasks;
 
 namespace Contoso.Expenses.Web.Pages.Expenses
@@ -21,11 +24,14 @@ namespace Contoso.Expenses.Web.Pages.Expenses
         private readonly ContosoExpensesWebContext _context;
         private string costCenterAPIUrl;
         private readonly QueueInfo _queueInfo;
-        private readonly IHostingEnvironment _env;
+        private readonly IWebHostEnvironment _env;
         private readonly IMetrics _metrics;
 
+        private string Source { get; } = "urn:contoso.web";
+        private string Type { get; } = "contoso.web.dispatchemail";
+
         public CreateModel(ContosoExpensesWebContext context, IOptions<ConfigValues> config, QueueInfo queueInfo,
-                            IHostingEnvironment env, IMetrics metrics)
+                            IWebHostEnvironment env, IMetrics metrics)
         {
             _metrics = metrics;
             _context = context;
@@ -66,25 +72,22 @@ namespace Contoso.Expenses.Web.Pages.Expenses
             _context.Expense.Add(Expense);
             Task t = _context.SaveChangesAsync();
 
-            // Serialize the expense and write it to the Azure Storage Queue
-            //CloudStorageAccount storageAccount = CloudStorageAccount.Parse(_queueInfo.ConnectionString);
-            //CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
-            //CloudQueue queue = queueClient.GetQueueReference(_queueInfo.QueueName);
-            //await queue.CreateIfNotExistsAsync();
-            //CloudQueueMessage queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(Expense));
-            //await queue.AddMessageAsync(queueMessage);
-
-            //ToDo: Until we figure out how to OpenFaaS locally/container, ignoring OpenFaaS stuff locally. Otherwise this will fail
-            //https://secanablog.wordpress.com/2018/06/10/run-your-own-faas-with-openfaas-and-net-core/
-            if (!_env.IsDevelopment())
+            if (!_env.IsEnvironment("Development"))
             {
-                // Serialize the expense and write it to the NATS Queue
-                var cf = new ConnectionFactory();
-                using (var c = cf.CreateConnection(_queueInfo.ConnectionString))
+                var cloudEvent = new CloudEvent
                 {
-                    Console.WriteLine($"Sending POST {JsonConvert.SerializeObject(Expense)}");
-                    c.Publish(_queueInfo.QueueName, Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(Expense)));
-                }
+                    Id = Guid.NewGuid().ToString(),
+                    Type = Type,
+                    Source = new Uri(Source),
+                    DataContentType = MediaTypeNames.Application.Json,
+                    Data = JsonConvert.SerializeObject(Expense)
+                };
+
+                var content = cloudEvent.ToHttpContent(ContentMode.Structured, new JsonEventFormatter());
+
+                var httpClient = new HttpClient();
+                var result = await httpClient.PostAsync(_queueInfo.ConnectionString, content);
+                
             }
             // Ensure the DB write is complete
             t.Wait();

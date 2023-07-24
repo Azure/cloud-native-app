@@ -8,8 +8,8 @@ spec:
   releaseName: linkerd 
   chart:
     spec:
-      chart: linkerd2 
-      version: '2.10.0'
+      chart: linkerd-control-plane 
+      version: '1.12.5'
       sourceRef:
         kind: HelmRepository
         name: linkerd

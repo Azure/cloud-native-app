@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - certs-sealed.yaml
+  - crds.yaml
   - release.yaml
   - jaeger.yaml
   - dashboard.yaml

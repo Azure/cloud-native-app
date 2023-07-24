@@ -5,3 +5,4 @@ metadata:
   namespace: tekton-pipelines
 data:
   disable-working-directory-overwrite: "true" # Tekton will not overwrite the working directory in Steps.
+  enable-api-fields: alpha # Tekton will enable the API fields in Tasks and Pipelines.

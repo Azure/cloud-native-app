@@ -9,6 +9,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /cd/$2
 spec:
+ ingressClassName: nginx
  tls:
  - hosts: 
    - {cicdWebhook}
