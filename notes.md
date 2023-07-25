@@ -16,19 +16,19 @@ helm repo update
 
 # Use Helm to deploy an NGINX ingress controller
 helm install nginx-ingress ingress-nginx/ingress-nginx \
-    --version 4.7.1 \
-    --namespace ingress-basic \
-    --set controller.replicaCount=2 \
-    --set controller.electionID= ingress-controller-leader \
-    --set controller.ingressClassResource.name= nginx \
-    --set controller.ingressClassResource.enabled= true \
-    --set controller.ingressClassResource.default= true \
-    --set controller.ingressClassResource.controllerValue= k8s.io/nginx \
-    --set controller.ingressClass= nginx \
-    --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path= "/healthz" \
-    --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
-    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux \
-    --set controller.admissionWebhooks.patch.nodeSelector."beta\.kubernetes\.io/os"=linux
+--version 4.7.1 \
+--namespace ingress-basic \
+--set controller.replicaCount=2 \
+--set controller.electionID=ingress-controller-leader \
+--set controller.ingressClassResource.name=nginx \
+--set controller.ingressClassResource.enabled=true \
+--set controller.ingressClassResource.default=true \
+--set controller.ingressClassResource.controllerValue=k8s.io/nginx \
+--set controller.ingressClass=nginx \
+--set controller.nodeSelector."kubernetes\.io/os"=linux \
+--set defaultBackend.nodeSelector."kubernetes\.io/os"=linux \
+--set controller.admissionWebhooks.patch.nodeSelector."kubernetes\.io/os"=linux \
+--set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"="/healthz" 
 ```
 
 Retrieve the public IP of the Loadbalancer service
@@ -55,7 +55,8 @@ topLevelDomain={FQDN DNS label Name to be updated here}
 
 ```bash
 # Create namespace for cert manager
-kubectl create namespace cert-manager cert-manager.io/disable-validation=true
+kubectl create namespace cert-manager
+kubectl label namespace cert-manager cert-manager.io/disable-validation=true
 
 # Add the Jetstack Helm repository
 helm repo add jetstack https://charts.jetstack.io
@@ -63,10 +64,10 @@ helm repo update
 
 # Install the cert-manager Helm chart
 helm install cert-manager jetstack/cert-manager\
-  --namespace ingress-basic \
+  --namespace cert-manager \
   --version v1.12.1 \
   --set installCRDs=true \
-  --set nodeSelector."beta\.kubernetes\.io/os"=linux
+  --set nodeSelector."kubernetes\.io/os"=linux
 ```
 
 Create the ClusterIssuer by applying the below YAML with the ***email address*** changed
@@ -78,7 +79,7 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt
-  namespace: ingress-basic
+  namespace: cert-manager
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
@@ -110,7 +111,16 @@ helm repo update
 helm install rook-ceph rook-release/rook-ceph \
     --version 1.11.9 \
     --namespace rook-ceph \
-    --value yml/rook-values.yaml     
+    -f yml/rook-values.yaml    
+
+kubectl apply -f yml/rook-cluster.yaml 
+kubectl apply -f yml/rook-storageclass.yaml
+```
+
+Wait for the installation to complete by watching the pods in the rook-ceph namespace
+
+```bash
+kubectl get po -n rook-ceph -A -w
 ```
 
 ## Harbor Installation
@@ -126,16 +136,16 @@ helm install harbor-nginx-ingress ingress-nginx/ingress-nginx \
     --version 4.7.1 \
     --namespace harbor-ingress-system \
     --set controller.replicaCount=2 \
-    --set controller.electionID= harbor-ingress-controller-leader \
-    --set controller.ingressClassResource.name= harbor \
-    --set controller.ingressClassResource.enabled= true \
-    --set controller.ingressClassResource.default= true \
-    --set controller.ingressClassResource.controllerValue= k8s.io/harbor \
-    --set controller.ingressClass= harbor \
-    --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path= "/healthz" \
-    --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
-    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux \
-    --set controller.admissionWebhooks.patch.nodeSelector."beta\.kubernetes\.io/os"=linux
+    --set controller.electionID=harbor-ingress-controller-leader \
+    --set controller.ingressClassResource.name=harbor \
+    --set controller.ingressClassResource.enabled=true \
+    --set controller.ingressClassResource.default=true \
+    --set controller.ingressClassResource.controllerValue=k8s.io/harbor \
+    --set controller.ingressClass=harbor \
+    --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"="/healthz" \
+    --set controller.nodeSelector."kubernetes\.io/os"=linux \
+    --set defaultBackend.nodeSelector."kubernetes\.io/os"=linux \
+    --set controller.admissionWebhooks.patch.nodeSelector."kubernetes\.io/os"=linux
 
 # Label the harbor-ingress-system namespace to disable cert resource validation
 kubectl label namespace harbor-ingress-system cert-manager.io/disable-validation=true
@@ -169,19 +179,18 @@ helm repo update
 helm install harbor harbor/harbor \
     --namespace harbor-system \
     --version 1.12.2 \
-    --set expose.tls.certSource= secret \
-    --set expose.tls.secretName=ingress-cert-harbor \
+    --set expose.tls.certSource=secret \
+    --set expose.tls.secret.secretName=ingress-cert-harbor \
     --set expose.ingress.hosts.core=$registryHost \
     --set expose.ingress.annotations."kubernetes\.io/ingress\.class"=harbor \
     --set expose.ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt  \
-    --set expose.ingress.annotations."ingress\.kubernetes\.io/ssl-redirect"= "true" \
     --set expose.ingress.annotations."acme\.cert-manager\.io/http01-ingress-class"=harbor \
     --set expose.ingress.className=harbor \
     --set notary.enabled=false \
     --set trivy.enabled=false \
     --set externalURL=$externalUrl \
     --set harborAdminPassword=admin \
-    -set persistence.enabled=true \
+    --set persistence.enabled=true \
     --set persistence.persistentVolumeClaim.registry.storageClass=rook-ceph-block \
     --set persistence.persistentVolumeClaim.chartmuseum.storageClass=rook-ceph-block \
     --set persistence.persistentVolumeClaim.jobservice.storageClass=rook-ceph-block \
@@ -242,7 +251,7 @@ helm install mysql bitnami/mysql \
     --set global.storageClass=rook-ceph-block 
 ```
 
-Create the databases
+Wait for the mysql instance to be ready and create the databases
 
 ```bash
 kubectl run -n mysql -i -t ubuntu --image=ubuntu:18.04 --restart=Never -- bash -il
@@ -366,6 +375,9 @@ sudo dpkg -i step-cli_0.23.4_amd64.deb
 
 step certificate create identity.linkerd.cluster.local ca.crt ca.key --profile root-ca --no-password --insecure
 step certificate create identity.linkerd.cluster.local issuer.crt issuer.key --ca ca.crt --ca-key ca.key --profile intermediate-ca --not-after 8760h --no-password --insecure
+
+# Install linkerd CRDs
+linkerd install --crds | kubectl apply -f -
 
 # Install linkerd
 linkerd install --identity-trust-anchors-file ca.crt --identity-issuer-certificate-file issuer.crt --identity-issuer-key-file issuer.key | kubectl apply -f -
@@ -502,7 +514,7 @@ Roles and bindings in the deployment namespace
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/main/task/kaniko/0.6/kaniko.yaml -n conexp-mvp-devops
-kubectl apply -f yml/git-clone-task.yaml -n conexp-mvp-devops
+kubectl apply -f yml/git-clone.yaml -n conexp-mvp-devops
 kubectl apply -f yml/app-deploy-rolebinding.yaml -n conexp-mvp
 kubectl apply -f yml/app-deploy-rolebinding.yaml -n conexp-mvp-fn
 ```
