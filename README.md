@@ -13,7 +13,7 @@ The CNCF Projects App is a sample expense application simulating a user submitti
 * [Linkerd](https://linkerd.io/) - Service Mesh (CNCF)
 * [Prometheus](https://prometheus.io/) - Monitoring (CNCF)
 * [Jaeger](https://www.jaegertracing.io/) - Observability/Tracing (CNCF)
-* [OpenFaaS](https://www.openfaas.com/) - Functions
+* [Knative](https://knative.dev/) - Serverless
 * [MySQL](https://www.mysql.com/) - Database
 * [Nginx](https://www.nginx.com/) - Kubernetes Ingress Controller
 * [Tekton](https://tekton.dev/) CI/CD (CD Foundation)
@@ -28,9 +28,9 @@ Below is the documented CNCF Projects App architecture for reference.
 ![Alt text](/images/cncf-projects-app-arc.png)
 
 ## Install
-We are currently working on both a [Helm](https://helm.sh/) and [CNAB](https://cnab.io/) installation of the repo. As of now please follow the instructions [here](notes.md) in sequence to deploy the CNCF Projects App in your environment.
+Please follow the instructions [here](notes.md) in sequence to deploy the CNCF Projects App in your environment.
 
-
+Instructions for automated deployment through gitops are [here](/gitops/readme.md).
 
 ## Contributing
 This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.
