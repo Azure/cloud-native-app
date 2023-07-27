@@ -1,6 +1,3 @@
-## Test Deployment
-### Change One
-
 # Setup
 
 Create a Kubernetes cluster with a minimum of 3 nodes and ~8+GB per node (e.g., Standard_DS3_v2)
