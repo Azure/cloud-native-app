@@ -182,7 +182,6 @@ helm install harbor harbor/harbor \
     --set expose.tls.certSource=secret \
     --set expose.tls.secret.secretName=ingress-cert-harbor \
     --set expose.ingress.hosts.core=$registryHost \
-    --set expose.ingress.annotations."kubernetes\.io/ingress\.class"=harbor \
     --set expose.ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt  \
     --set expose.ingress.annotations."acme\.cert-manager\.io/http01-ingress-class"=harbor \
     --set expose.ingress.className=harbor \
