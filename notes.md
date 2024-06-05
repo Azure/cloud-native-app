@@ -233,7 +233,7 @@ admin
 
 ## MySQL Installation
 
-Deploy Mysql
+Deploy MySQL DB. Please replace ENTERYOURPASSWORD with your chosen password. Please ensure that same password is used in all to be replaced values before executing the commands.
 
 ```bash
 kubectl create ns mysql
@@ -244,9 +244,9 @@ helm repo update
 helm install mysql bitnami/mysql \
     --namespace mysql \
     --version 9.10.5 \
-    --set auth.rootPassword=FTA@CNCF0n@zure3 \
+    --set auth.rootPassword=ENTERYOURPASSWORD \
     --set auth.username=ftacncf  \
-    --set auth.password=FTA@CNCF0n@zure3 \
+    --set auth.password=ENTERYOURPASSWORD \
     --set global.storageClass=rook-ceph-block 
 ```
 
@@ -255,7 +255,7 @@ Wait for the mysql instance to be ready and create the databases
 ```bash
 kubectl run -n mysql -i -t ubuntu --image=ubuntu:18.04 --restart=Never -- bash -il
 apt-get update && apt-get install mysql-client -y
-mysql -h mysql --password=FTA@CNCF0n@zure3
+mysql -h mysql --password=ENTERYOURPASSWORD
 show databases;
 
 CREATE DATABASE conexpweb;
